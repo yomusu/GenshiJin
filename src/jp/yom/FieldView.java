@@ -67,8 +67,6 @@ public class FieldView extends SurfaceView implements SurfaceHolder.Callback {
 		surfaceWidth = width;
 		surfaceHeight = height;
 		Log.v("App","surfaceChanged : "+width+"  "+height);
-		
-		YLog.info( "d", isHardwareAccelerated() );
 	}
 	
 	/*************************************************
