@@ -4,6 +4,20 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     >
-    <FrameLayout android:layout_width="match_parent" android:id="@+id/frameLayout1" android:layout_height="fill_parent">
+    <FrameLayout android:id="@+id/frameLayout1"
+    	android:layout_width="match_parent"
+    	android:layout_height="fill_parent"
+    >
+    	<jp.yom.yglib.gl.LogView  android:id="@+id/DebugView"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="fill_parent"
+    	android:visibility="invisible"/>
+    	<jp.yom.yglib.gl.GLFieldView  android:id="@+id/GLView"
+	    	android:layout_width="fill_parent"
+	    	android:layout_height="fill_parent"
+    	/>
+    	<Button android:text="Button" android:id="@+id/button1" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+    	
+    	
     </FrameLayout>
 </LinearLayout>

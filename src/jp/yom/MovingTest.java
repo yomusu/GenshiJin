@@ -30,6 +30,7 @@ import android.view.WindowManager;
  * 
  * 
  * アプリケーション
+ * 古いヤツ
  * 
  * 
  * @author Yomusu
@@ -93,30 +94,30 @@ public class MovingTest extends Activity implements SensorEventListener {
 			accelometer = sensorList.get(0);
 		
 		
-		//--------------------------------
-		// GLフィールドの作成
-		view = new GLFieldView( this );
-		
-		view.entryTexture( R.drawable.ball, "ball" );
-		view.entryTexture( R.drawable.iwa24, "iwa" );
-		view.entryTexture( R.drawable.penguin01, "penguinL01" );
-		view.entryTexture( R.drawable.penguin02, "penguinL02" );
-		view.entryTexture( R.drawable.penguin11, "penguinR01" );
-		view.entryTexture( R.drawable.penguin12, "penguinR02" );
-		
-		
-		//--------------------------------
-		// レイアウト構成
-		View	debugView = createDebugView();
-		ViewGroup	mainView = (ViewGroup)findViewById(R.id.frameLayout1);
-		mainView.addView( view, 0 );
-		mainView.addView( debugView, 1 );
-		mainView.bringChildToFront( view );
-		
-		//-----------------------------------
-		// Gameスレッドの起動
-		thread = new GameThread();
-		thread.start();
+//		//--------------------------------
+//		// GLフィールドの作成
+//		view = new GLFieldView( this );
+//		
+//		view.entryTexture( R.drawable.ball, "ball" );
+//		view.entryTexture( R.drawable.iwa24, "iwa" );
+//		view.entryTexture( R.drawable.penguin01, "penguinL01" );
+//		view.entryTexture( R.drawable.penguin02, "penguinL02" );
+//		view.entryTexture( R.drawable.penguin11, "penguinR01" );
+//		view.entryTexture( R.drawable.penguin12, "penguinR02" );
+//		
+//		
+//		//--------------------------------
+//		// レイアウト構成
+//		View	debugView = createDebugView();
+//		ViewGroup	mainView = (ViewGroup)findViewById(R.id.frameLayout1);
+//		mainView.addView( view, 0 );
+//		mainView.addView( debugView, 1 );
+//		mainView.bringChildToFront( view );
+//		
+//		//-----------------------------------
+//		// Gameスレッドの起動
+//		thread = new GameThread();
+//		thread.start();
 	}
 	
 	protected View createDebugView() {
@@ -149,7 +150,7 @@ public class MovingTest extends Activity implements SensorEventListener {
 		YLog.setInstance( logwin );
 		
 		
-		LogView	view = new LogView( this );
+		LogView	view = new LogView( this, null );
 		view.root.addChild( debugWindow );
 		view.root.addChild( logwin );
 		

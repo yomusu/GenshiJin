@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -36,8 +37,8 @@ public class LogView extends SurfaceView implements SurfaceHolder.Callback {
 	
 	
 	
-	public LogView(Context context) {
-		super(context);
+	public LogView( Context context, AttributeSet attr ) {
+		super(context,attr);
 		
 		// Surfaceのセットアップ
 		surfaceHolder = getHolder();

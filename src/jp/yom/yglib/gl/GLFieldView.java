@@ -12,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap.Config;
 import android.opengl.GLSurfaceView;
+import android.util.AttributeSet;
+import android.util.Log;
 import android.view.SurfaceHolder;
 
 
@@ -19,6 +21,9 @@ import android.view.SurfaceHolder;
  * 
  * 
  * OpenGLのSurfaceView
+ * 
+ * センサがメインに行ったため、
+ * このクラスがGLSurfaceViewを継承しなくてはならない意味がほぼ無くなった
  * 
  * @author Yomusu
  *
@@ -41,9 +46,9 @@ public class GLFieldView extends GLSurfaceView {
 	
 	
 	
-	public GLFieldView(Context context) {
+	public GLFieldView( Context context, AttributeSet attr ) {
 		
-		super(context);
+		super(context,attr);
 		
 		//-----------------------------
 		// レンダラーの設定
@@ -205,6 +210,7 @@ public class GLFieldView extends GLSurfaceView {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		super.surfaceCreated(holder);
+		Log.v("App","GL:surfaceCreated");
 	}
 	
 	/****************************************************

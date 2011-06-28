@@ -1,5 +1,6 @@
 package jp.yom;
 
+import java.io.IOException;
 import java.util.List;
 
 import jp.yom.MovingTest.GameAppToolkit;
@@ -27,6 +28,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+
+/************************************************************
+ * 
+ * 
+ * 
+ * アプリケーション
+ * 
+ * 
+ * @author Yomusu
+ *
+ */
 public class GensiJin extends Activity implements SensorEventListener {
 	
 	private WindowManager	windowManager = null;
@@ -87,8 +99,8 @@ public class GensiJin extends Activity implements SensorEventListener {
 		
 		//--------------------------------
 		// GLフィールドの作成
-		view = new GLFieldView( this );
-		
+	//	view = new GLFieldView( this, null );
+		view = (GLFieldView)findViewById(R.id.GLView);
 		view.entryTexture( R.drawable.ball, "ball" );
 		view.entryTexture( R.drawable.iwa24, "iwa" );
 		view.entryTexture( R.drawable.penguin01, "penguinL01" );
@@ -97,13 +109,9 @@ public class GensiJin extends Activity implements SensorEventListener {
 		view.entryTexture( R.drawable.penguin12, "penguinR02" );
 		
 		
-		//--------------------------------
-		// レイアウト構成
-		View	debugView = createDebugView();
-		ViewGroup	mainView = (ViewGroup)findViewById(R.id.frameLayout1);
-		mainView.addView( view, 0 );
-		mainView.addView( debugView, 1 );
-		mainView.bringChildToFront( view );
+		//-----------------------------------
+		// DebugViewの初期化(しかしDebugViewはこれではダメっぽい)
+		initDebugView( (LogView)findViewById(R.id.DebugView) );
 		
 		//-----------------------------------
 		// Gameスレッドの起動
@@ -111,7 +119,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 		thread.start();
 	}
 	
-	protected View createDebugView() {
+	protected LogView initDebugView( LogView view ) {
 		
 		//--------------------------------
 		// デバッグウィンドウ
@@ -141,7 +149,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 		YLog.setInstance( logwin );
 		
 		
-		LogView	view = new LogView( this );
+	//	LogView	view = new LogView( this, null );
 		view.root.addChild( debugWindow );
 		view.root.addChild( logwin );
 		
@@ -262,6 +270,12 @@ public class GensiJin extends Activity implements SensorEventListener {
 			
 			// イベントポンプを監視してサーフェイスが作成されるのを待つ
 			// view.waitSurface();
+			try {
+				Thread.sleep(1000);
+			} catch( InterruptedException e ) {
+				
+			}
+			
 			
 			//-----------------------------------
 			// タイトル
