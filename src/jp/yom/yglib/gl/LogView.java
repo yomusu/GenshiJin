@@ -195,7 +195,7 @@ public class LogView extends SurfaceView implements SurfaceHolder.Callback {
 								wait(waitTime);
 							} catch( InterruptedException e ){
 							}
-							Log.v("App", Long.toString(waitTime) + "  " + Long.toString(processTime) + " now="+Long.toString(System.currentTimeMillis()) );
+						//	Log.v("App", Long.toString(waitTime) + "  " + Long.toString(processTime) + " now="+Long.toString(System.currentTimeMillis()) );
 						}
 					}
 				}

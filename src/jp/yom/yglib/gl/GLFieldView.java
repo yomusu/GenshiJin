@@ -64,7 +64,7 @@ public class GLFieldView extends GLSurfaceView {
 		
 		//----------------------------------
 		// Touchイベントの要求
-		setFocusable( true );
+	//	setFocusable( true );
 	}
 	
 	class TextureEntry {
@@ -181,10 +181,12 @@ public class GLFieldView extends GLSurfaceView {
 			int	vh = (int)((float)screenHeight * scale);
 			
 			gl.glViewport( (surfaceWidth-vw)/2, (surfaceHeight-vh)/2, vw, vh );
+			Log.v("App","GL:Render.surfaceChanged");
 		}
 
 		@Override
 		public void onSurfaceCreated(GL10 gl, EGLConfig eglconfig) {
+			Log.v("App","GL:Render.surfaceCreated");
 		}
 	};
 	
@@ -221,5 +223,6 @@ public class GLFieldView extends GLSurfaceView {
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		super.surfaceDestroyed(holder);
+		Log.v("App","GL:surfaceDestroy");
 	}
 }

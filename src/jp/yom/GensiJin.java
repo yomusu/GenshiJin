@@ -1,10 +1,7 @@
 package jp.yom;
 
-import java.io.IOException;
 import java.util.List;
 
-import jp.yom.MovingTest.GameAppToolkit;
-import jp.yom.MovingTest.GameThread;
 import jp.yom.yglib.AppToolkit;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.gl.GLFieldView;
@@ -24,8 +21,6 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
 import android.view.WindowManager;
 
 
@@ -111,7 +106,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 		
 		//-----------------------------------
 		// DebugViewの初期化(しかしDebugViewはこれではダメっぽい)
-		initDebugView( (LogView)findViewById(R.id.DebugView) );
+	//	initDebugView( (LogView)findViewById(R.id.DebugView) );
 		
 		//-----------------------------------
 		// Gameスレッドの起動

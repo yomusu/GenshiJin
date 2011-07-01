@@ -8,10 +8,6 @@
     	android:layout_width="match_parent"
     	android:layout_height="fill_parent"
     >
-    	<jp.yom.yglib.gl.LogView  android:id="@+id/DebugView"
-	    	android:layout_width="fill_parent"
-	    	android:layout_height="fill_parent"
-    	android:visibility="invisible"/>
     	<jp.yom.yglib.gl.GLFieldView  android:id="@+id/GLView"
 	    	android:layout_width="fill_parent"
 	    	android:layout_height="fill_parent"
