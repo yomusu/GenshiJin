@@ -1,4 +1,4 @@
-package jp.yom.yglib.gl;
+package jp.yom.yglib;
 
 import jp.yom.yglib.node.YNode;
 import android.content.Context;

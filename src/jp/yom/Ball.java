@@ -3,9 +3,9 @@ package jp.yom;
 import java.util.Iterator;
 
 import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YBoundary;
-import jp.yom.yglib.node.YLog;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FPoint;

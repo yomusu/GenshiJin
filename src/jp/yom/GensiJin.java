@@ -3,13 +3,12 @@ package jp.yom;
 import java.util.List;
 
 import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.LogView;
 import jp.yom.yglib.StopWatch;
+import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.GLFieldView;
-import jp.yom.yglib.gl.LogView;
 import jp.yom.yglib.gl.YRendererList;
-import jp.yom.yglib.node.LogWindow;
 import jp.yom.yglib.node.TextWindow;
-import jp.yom.yglib.node.YLog;
 import jp.yom.yglib.node.YNode;
 import android.app.Activity;
 import android.content.Context;
@@ -22,6 +21,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 
 /************************************************************
@@ -63,6 +63,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 	/** 加速度センサの値 */
 	float	gravityX, gravityY;
 	
+	TextView	cpuPowerWatch = null;
 	
 	
 	/** Called when the activity is first created. */
@@ -94,7 +95,6 @@ public class GensiJin extends Activity implements SensorEventListener {
 		
 		//--------------------------------
 		// GLフィールドの作成
-	//	view = new GLFieldView( this, null );
 		view = (GLFieldView)findViewById(R.id.GLView);
 		view.entryTexture( R.drawable.ball, "ball" );
 		view.entryTexture( R.drawable.iwa24, "iwa" );
@@ -105,8 +105,10 @@ public class GensiJin extends Activity implements SensorEventListener {
 		
 		
 		//-----------------------------------
-		// DebugViewの初期化(しかしDebugViewはこれではダメっぽい)
-	//	initDebugView( (LogView)findViewById(R.id.DebugView) );
+		// ログシステムにTextViewをセット
+		YLog.setTextView( (TextView)findViewById(R.id.textView1) );
+		
+		cpuPowerWatch = (TextView)findViewById(R.id.watchCPUValue);
 		
 		//-----------------------------------
 		// Gameスレッドの起動
@@ -134,19 +136,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 		debugWindow.setSize( 300, 200 );
 		debugWindow.setLocation( 0,0 );
 		
-		//--------------------------------
-		// ログウィンドウ
-		LogWindow	logwin = new LogWindow();
-		
-		logwin.setSize( 300,400 );
-		logwin.setLocation( 800, 100 );
-		
-		YLog.setInstance( logwin );
-		
-		
-	//	LogView	view = new LogView( this, null );
 		view.root.addChild( debugWindow );
-		view.root.addChild( logwin );
 		
 		return view;
 	}
@@ -296,7 +286,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 			
 			
 			// 一定時間の間ループ
-			int	nokoriTime = 60*1000;
+			int	nokoriTime = 10*1000;
 			
 			StopWatch	funkaWatch = new StopWatch();
 			
@@ -334,7 +324,7 @@ public class GensiJin extends Activity implements SensorEventListener {
 			YLog.info("App","GameThread is Finished.");
 		}
 		
-		protected long	intervalMillis = 1000 / 30;
+		protected long	intervalMillis = 1000 / 24;
 		protected boolean	isFinished = true;
 		protected long	lastProcessTime = 0;
 		
@@ -353,7 +343,10 @@ public class GensiJin extends Activity implements SensorEventListener {
 					}
 					//	Log.v("App", Long.toString(waitTime) + "  " + Long.toString(processTime) + " now="+Long.toString(System.currentTimeMillis()) );
 				}
-
+				
+				float	cpu = ((float)waitTime *100.0f )/ (float)intervalMillis;
+			//	cpuPowerWatch.setText( Float.toString(cpu) );
+				
 				// 処理前時間
 				lastProcessTime = System.currentTimeMillis();
 			}

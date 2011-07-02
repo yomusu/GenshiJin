@@ -1,7 +1,9 @@
-package jp.yom.yglib.node;
+package jp.yom.yglib;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+
+import jp.yom.yglib.node.YWindow;
 
 import android.graphics.Canvas;
 import android.graphics.Color;

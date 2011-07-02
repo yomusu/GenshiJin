@@ -1,5 +1,6 @@
 package jp.yom.yglib.node;
 
+import jp.yom.yglib.YLog;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -25,7 +26,7 @@ public class YWindow extends YNode {
 	float		width=300, height=200;
 	
 	/** 中身エリアの周りのスキマ */
-	RectF	insets = null;
+	public RectF	insets = null;
 	
 	/** 背景色 */
 	public final Paint	backPaint = new Paint();
