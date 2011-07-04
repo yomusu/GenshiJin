@@ -3,7 +3,7 @@ package jp.yom;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.gl.Sprite;
 import jp.yom.yglib.gl.YRendererList;
@@ -109,7 +109,7 @@ public class Kazan extends YNode {
 	 * 
 	 */
 	@Override
-	public void process( YNode parent, AppToolkit fh, YRendererList renderList  ) {
+	public void process( YNode parent, GameActivity fh, YRendererList renderList  ) {
 		
 		Iterator<Tama>	it = tamaList.iterator();
 		while( it.hasNext() ) {

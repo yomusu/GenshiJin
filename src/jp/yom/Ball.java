@@ -2,7 +2,7 @@ package jp.yom;
 
 import java.util.Iterator;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YBoundary;
@@ -69,7 +69,7 @@ public class Ball extends YNode {
 	 * 
 	 */
 	@Override
-	public void process( YNode parent, AppToolkit fh, YRendererList renderList ) {
+	public void process( YNode parent, GameActivity fh, YRendererList renderList ) {
 		
 		// 移動元座標バックアップ
 		FPoint	oldPos = new FPoint( pos );

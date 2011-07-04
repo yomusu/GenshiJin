@@ -1,6 +1,6 @@
 package jp.yom;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
@@ -43,7 +43,7 @@ public class StageRoot extends YNode {
 	
 	
 	@Override
-	public void process(YNode parent, AppToolkit h, YRendererList renderList) {
+	public void process(YNode parent, GameActivity h, YRendererList renderList) {
 		super.process(parent, h, renderList);
 		
 		// カメラ位置の計算

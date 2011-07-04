@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YBoundary;
 import jp.yom.yglib.node.YNode;
@@ -92,7 +92,7 @@ public class Stage extends YNode implements YBoundary {
 	 * 
 	 */
 	@Override
-	public void process(YNode parent, AppToolkit h, YRendererList renderList ) {
+	public void process(YNode parent, GameActivity h, YRendererList renderList ) {
 		
 		
 		// 加速度
@@ -215,7 +215,7 @@ class Bar extends YNode {
 	 * @param parent
 	 * @param fh
 	 */
-	public void rotate( YNode parent, AppToolkit fh, float th ) {
+	public void rotate( YNode parent, GameActivity fh, float th ) {
 		
 		this.rotate = th * (float)Math.PI;
 		

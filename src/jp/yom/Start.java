@@ -1,6 +1,6 @@
 package jp.yom;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
@@ -121,7 +121,7 @@ public class Start extends YNode {
 	}
 	
 	@Override
-	public void process(YNode parent, AppToolkit h, YRendererList renderList ) {
+	public void process(YNode parent, GameActivity h, YRendererList renderList ) {
 		
 		
 		logoAnime.process();

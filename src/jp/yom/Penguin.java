@@ -1,6 +1,6 @@
 package jp.yom;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.gl.Sprite;
 import jp.yom.yglib.gl.YRendererList;
@@ -50,7 +50,7 @@ public class Penguin extends YNode {
 	
 	
 	@Override
-	public void process(YNode parent, AppToolkit app, YRendererList renderList) {
+	public void process(YNode parent, GameActivity app, YRendererList renderList) {
 		super.process(parent, app, renderList);
 		
 		

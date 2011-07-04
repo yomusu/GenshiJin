@@ -3,7 +3,7 @@ package jp.yom.yglib.node;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import jp.yom.yglib.AppToolkit;
+import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.YRendererList;
 import android.graphics.Canvas;
 import android.view.MotionEvent;
@@ -114,7 +114,7 @@ public class YNode {
 	 * 
 	 * @param h
 	 */
-	public void process( YNode parent, AppToolkit app, YRendererList renderList ) {
+	public void process( YNode parent, GameActivity app, YRendererList renderList ) {
 		
 		// チャイルドを呼ぶ
 		if( childList!=null ) {
