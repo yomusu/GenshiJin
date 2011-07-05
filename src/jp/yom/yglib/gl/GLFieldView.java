@@ -6,6 +6,8 @@ import java.util.Iterator;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import jp.yom.yglib.YSignal;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -44,6 +46,8 @@ public class GLFieldView extends GLSurfaceView {
 	/** レンダリングリスト */
 	protected YRendererList	renderList = null;
 	
+	/** サーフェースが作成されたシグナル */
+	public final YSignal<Boolean>	surfaceReadySignal = new YSignal<Boolean>();
 	
 	
 	public GLFieldView( Context context, AttributeSet attr ) {
@@ -157,12 +161,9 @@ public class GLFieldView extends GLSurfaceView {
 					if( bmp!=null ) {
 
 						graphics.gl = gl;
-						int	texid = graphics.bindTexture( bmp );
+						graphics.loadTexture( te.texKey, bmp );
 
 						bmp.recycle();
-
-						// 管理Mapに追加
-						graphics.texMap.put( te.texKey, texid );
 					}
 				}
 			}
@@ -182,6 +183,9 @@ public class GLFieldView extends GLSurfaceView {
 			
 			gl.glViewport( (surfaceWidth-vw)/2, (surfaceHeight-vh)/2, vw, vh );
 			Log.v("App","GL:Render.surfaceChanged");
+			
+			// シグナル
+			surfaceReadySignal.setSignal( Boolean.TRUE );
 		}
 
 		@Override

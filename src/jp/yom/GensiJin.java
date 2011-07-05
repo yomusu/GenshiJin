@@ -6,6 +6,7 @@ import java.text.NumberFormat;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.ScenarioInterruptException;
 import jp.yom.yglib.StopWatch;
+import jp.yom.yglib.TimeOutException;
 import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.GLFieldView;
 import jp.yom.yglib.gl.YRendererList;
@@ -78,17 +79,21 @@ public class GensiJin extends GameActivity {
 		YLog.info("App","GameThread is Started.");
 
 		// イベントポンプを監視してサーフェイスが作成されるのを待つ
-		// view.waitSurface();
 		try {
-			Thread.sleep(1000);
+			view.surfaceReadySignal.waitForSignalOf( Boolean.TRUE, 3000 );
+		} catch( TimeOutException e ) {
+			YLog.info("App","TimeOutException.");
+			return;
 		} catch( InterruptedException e ) {
-
+			YLog.info("App","InterruptException.");
+			return;
 		}
 
 
 		//-----------------------------------
 		// タイトル
-
+		
+		// テクスチャのセット
 
 
 		//-----------------------------------
