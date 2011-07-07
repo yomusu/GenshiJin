@@ -6,6 +6,8 @@ import java.util.Iterator;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import jp.yom.yglib.YSignal;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -22,8 +24,7 @@ import android.view.SurfaceHolder;
  * 
  * OpenGLのSurfaceView
  * 
- * センサがメインに行ったため、
- * このクラスがGLSurfaceViewを継承しなくてはならない意味がほぼ無くなった
+ * onTouchイベントをハンドルする必要がある
  * 
  * @author Yomusu
  *
@@ -44,6 +45,8 @@ public class GLFieldView extends GLSurfaceView {
 	/** レンダリングリスト */
 	protected YRendererList	renderList = null;
 	
+	/** サーフェースが作成されたシグナル */
+	public final YSignal<Boolean>	surfaceReadySignal = new YSignal<Boolean>();
 	
 	
 	public GLFieldView( Context context, AttributeSet attr ) {
@@ -79,7 +82,8 @@ public class GLFieldView extends GLSurfaceView {
 	 * 
 	 * 使用するテクスチャを登録する
 	 * 
-	 * 実際にテクスチャが読み込まれてOpenGL的に登録されるのはSurfaceがChangedした時です
+	 * 実際にテクスチャが読み込まれてOpenGL的に登録されるのは
+	 * invokeDraw()を行い、GLスレッドで処理した時です。
 	 * 
 	 * @param resID		R.drawableのリソースID
 	 * @param texKey
@@ -103,7 +107,13 @@ public class GLFieldView extends GLSurfaceView {
 		
 		@Override
 		public void onDrawFrame(GL10 gl) {
-
+			
+			//----------------------------------
+			// テクスチャ要求があればそれを消化
+			
+			
+			//----------------------------------
+			// 描画準備
 	        gl.glDisable(GL10.GL_DITHER);
 			gl.glDisable( GL10.GL_TEXTURE_2D );
 			gl.glDisable( GL10.GL_BLEND );
@@ -157,12 +167,9 @@ public class GLFieldView extends GLSurfaceView {
 					if( bmp!=null ) {
 
 						graphics.gl = gl;
-						int	texid = graphics.bindTexture( bmp );
+						graphics.loadTexture( te.texKey, bmp );
 
 						bmp.recycle();
-
-						// 管理Mapに追加
-						graphics.texMap.put( te.texKey, texid );
 					}
 				}
 			}
@@ -182,6 +189,9 @@ public class GLFieldView extends GLSurfaceView {
 			
 			gl.glViewport( (surfaceWidth-vw)/2, (surfaceHeight-vh)/2, vw, vh );
 			Log.v("App","GL:Render.surfaceChanged");
+			
+			// シグナル
+			surfaceReadySignal.setSignal( Boolean.TRUE );
 		}
 
 		@Override
