@@ -2,6 +2,7 @@ package jp.yom.yglib.gl;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -70,11 +71,7 @@ public class GLFieldView extends GLSurfaceView {
 	//	setFocusable( true );
 	}
 	
-	class TextureEntry {
-		int	resID;
-		String	texKey;
-	}
-	
+	/** 登録要求のテクスチャ */
 	ArrayList<TextureEntry>	textureEntry = new ArrayList<TextureEntry>();
 	
 	
@@ -88,13 +85,10 @@ public class GLFieldView extends GLSurfaceView {
 	 * @param resID		R.drawableのリソースID
 	 * @param texKey
 	 */
-	public void entryTexture( int resID, String texKey ) {
-		
-		TextureEntry	te = new TextureEntry();
-		te.resID = resID;
-		te.texKey = texKey;
-		
-		textureEntry.add( te );
+	public void entryTextures( List<TextureEntry> tex ) {
+		synchronized( textureEntry ) {
+			textureEntry.addAll( tex );
+		}
 	}
 	
 	/*************************************************************
@@ -110,7 +104,17 @@ public class GLFieldView extends GLSurfaceView {
 			
 			//----------------------------------
 			// テクスチャ要求があればそれを消化
-			
+			if( textureEntry.size() > 0 ) {
+				synchronized( textureEntry ) {
+					// 本当はtexEntryにsyncが必要
+					for( TextureEntry tex : textureEntry ) {
+						graphics.gl = gl;
+						graphics.loadTexture( tex.key, tex.bmp );
+					}
+					// 消化したのでクリア
+					textureEntry.clear();
+				}
+			}
 			
 			//----------------------------------
 			// 描画準備
@@ -155,25 +159,10 @@ public class GLFieldView extends GLSurfaceView {
 			surfaceHeight = h;
 			
 			//-------------------------------
-			// テクスチャのエントリー
-			{
-				Resources	res = getContext().getResources();
-				BitmapFactory.Options	options = new BitmapFactory.Options();
-				options.inScaled = false;
-				options.inPreferredConfig = Config.ARGB_8888;
+			// テクスチャの復帰
+			// 本当に必要だよね？
+			// しかし復帰処理に、ビットマップの読み込みを含むのかどうかが疑問
 
-				for( TextureEntry te : textureEntry ) {
-					Bitmap	bmp = BitmapFactory.decodeResource( res, te.resID, options );
-					if( bmp!=null ) {
-
-						graphics.gl = gl;
-						graphics.loadTexture( te.texKey, bmp );
-
-						bmp.recycle();
-					}
-				}
-			}
-			
 			//-------------------------------
 			// ビューポートの設定
 			// スクリーンとゲーム画面サイズの縦横比を比較して、縦と横、どちらを基準にするか判断する

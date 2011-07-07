@@ -2,6 +2,7 @@ package jp.yom;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.Arrays;
 
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.ScenarioInterruptException;
@@ -9,6 +10,7 @@ import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.TimeOutException;
 import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.GLFieldView;
+import jp.yom.yglib.gl.TextureEntry;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import android.widget.TextView;
@@ -32,22 +34,6 @@ public class GensiJin extends GameActivity {
 	
 	DecimalFormat	cpuPowerFormat = new DecimalFormat("000.0%");
 	
-	/*************************************************************
-	 * 
-	 * GLSurfaceViewの初期化
-	 */
-	@Override
-	protected void initGLSurfaceView( GLFieldView view ) {
-		
-		// テクスチャの登録
-		view.entryTexture( R.drawable.ball, "ball" );
-		view.entryTexture( R.drawable.iwa24, "iwa" );
-		view.entryTexture( R.drawable.penguin01, "penguinL01" );
-		view.entryTexture( R.drawable.penguin02, "penguinL02" );
-		view.entryTexture( R.drawable.penguin11, "penguinR01" );
-		view.entryTexture( R.drawable.penguin12, "penguinR02" );
-	}
-
 	/*************************************************************
 	 * 
 	 * 
@@ -88,8 +74,35 @@ public class GensiJin extends GameActivity {
 			YLog.info("App","InterruptException.");
 			return;
 		}
-
-
+		
+		//-----------------------------------
+		// テクスチャの読み込み
+		TextureEntry[]	ts = new TextureEntry[] {
+				new TextureEntry("ball", R.drawable.ball ),
+				new TextureEntry("iwa", R.drawable.iwa24 ),
+				new TextureEntry("penguinL01", R.drawable.penguin01 ),
+				new TextureEntry("penguinL02", R.drawable.penguin02 ),
+				new TextureEntry("penguinR01", R.drawable.penguin11 ),
+				new TextureEntry("penguinR02", R.drawable.penguin12 ),
+		};
+		
+		// 読み込み
+		for( TextureEntry t : ts )
+			t.loadBitmap( getResources() );
+		
+		// 登録
+		view.entryTextures( Arrays.asList(ts) );
+		
+		// GLスレッドを回す
+		invokeDraw( null );
+		
+		// ここでビットマップの解放ができるかどうか。
+		// ここでというより、GLスレッドにて登録後、自動で解放した方がよいか
+		// っていうか解放した場合、onResume時にどうなるのか
+		for( TextureEntry t : ts )
+			t.disposeBitmap();
+		
+		
 		//-----------------------------------
 		// タイトル
 		
