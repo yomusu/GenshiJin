@@ -35,7 +35,7 @@ public class YGraphics {
 	public final FloatBuffer	ftbuf4;
 	
 	/** テクスチャマップ */
-	private final HashMap<String,Integer>	texMap = new HashMap<String,Integer>();
+	private final HashMap<String,TextureEntry>	texMap = new HashMap<String,TextureEntry>();
 	
 	
 	public YGraphics() {
@@ -46,6 +46,17 @@ public class YGraphics {
 	}
 	
 	
+	/************************************************
+	 * 
+	 * テクスチャを管理に追加します。
+	 * この後、loadTextureを行って始めてテクスチャが使えるようになります
+	 * 
+	 * @param tex
+	 */
+	public void addTexture( TextureEntry tex ) {
+		
+		texMap.put( tex.key, tex );
+	}
 	
 	/************************************************
 	 * 
@@ -56,20 +67,25 @@ public class YGraphics {
 	 * 
 	 * @return	テクスチャID
 	 */
-	public void loadTexture( String texKey, Bitmap bmp ) {
+	public void loadTexture() {
 		
-		int[]	textures = new int[1];
-		
-		gl.glGenTextures( 1, textures, 0 );
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, textures[0] );
-		GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, bmp, 0 );
-		gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST );
-		gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, 0 );
-		
-		
-		// 管理Mapに追加
-		texMap.put( texKey, textures[0] );
+		for( TextureEntry tex : texMap.values() ) {
+			if( tex.bindID == null ) {
+				
+				int[]	textures = new int[1];
+
+				gl.glGenTextures( 1, textures, 0 );
+				gl.glBindTexture( GL10.GL_TEXTURE_2D, textures[0] );
+				GLUtils.texImage2D( GL10.GL_TEXTURE_2D, 0, tex.getBitmap(), 0 );
+				gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MIN_FILTER, GL10.GL_NEAREST );
+				gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );
+				gl.glBindTexture( GL10.GL_TEXTURE_2D, 0 );
+
+
+				// 管理に追加
+				tex.bindID = new Integer( textures[0] );
+			}
+		}
 	}
 	
 	
@@ -80,7 +96,9 @@ public class YGraphics {
 	 * @param texKey
 	 */
 	public void bindTexture( String texKey ) {
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, texMap.get(texKey) );
+		TextureEntry	tex = texMap.get(texKey);
+		if( tex!=null && tex.bindID!=null )
+			gl.glBindTexture( GL10.GL_TEXTURE_2D, tex.bindID.intValue() );
 	}
 	
 	
@@ -90,9 +108,13 @@ public class YGraphics {
 	 * 
 	 * @param texKey
 	 */
-	public void deleteTexture( String texKey ) {
-		int	num = texMap.remove( texKey );
-		gl.glDeleteTextures( 1, new int[]{ num }, 0 );
+	public void deleteAllTexture() {
+		for( TextureEntry tex : texMap.values() ) {
+			if( tex.bindID!=null ) {
+				gl.glDeleteTextures( 1, new int[]{ tex.bindID.intValue() }, 0 );
+				tex.bindID = null;
+			}
+		}
 	}
 	
 	/************************************************
@@ -155,7 +177,7 @@ public class YGraphics {
 		gl.glEnable( GL10.GL_BLEND );
 		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
 		
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, texMap.get(texkey) );
+		bindTexture( texkey );
         
 		gl.glVertexPointer( 2, GL10.GL_FLOAT, 0, fvbuf4 );
 		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );

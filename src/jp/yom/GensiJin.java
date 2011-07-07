@@ -96,11 +96,8 @@ public class GensiJin extends GameActivity {
 		// GLスレッドを回す
 		invokeDraw( null );
 		
-		// ここでビットマップの解放ができるかどうか。
+		// ここでビットマップの解放はできない。invokeDrawがGLスレッドの終了を待たないため。
 		// ここでというより、GLスレッドにて登録後、自動で解放した方がよいか
-		// っていうか解放した場合、onResume時にどうなるのか
-		for( TextureEntry t : ts )
-			t.disposeBitmap();
 		
 		
 		//-----------------------------------
@@ -169,6 +166,12 @@ public class GensiJin extends GameActivity {
 		} catch( ScenarioInterruptException e ) {
 
 		}
+		
+		
+		//------------------------------------
+		// テクスチャビットマップの解放
+		for( TextureEntry t : ts )
+			t.disposeBitmap();
 		
 		YLog.info("App","GameThread is Finished.");
 	}

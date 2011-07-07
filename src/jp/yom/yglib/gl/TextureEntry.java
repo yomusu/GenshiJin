@@ -16,8 +16,14 @@ import android.graphics.BitmapFactory;
 public class TextureEntry {
 	
 	public final String	key;
-	public	Bitmap	bmp = null;
+	private	Bitmap	bmp = null;
+	
+	/** リソースID */
 	public final int	resID;
+	
+	/** バインドされたID */
+	public Integer	bindID = null;
+	
 	
 	public TextureEntry( String key, int resID ) {
 		
@@ -25,6 +31,15 @@ public class TextureEntry {
 		this.resID = resID;
 	}
 	
+	/***************************************************
+	 * 
+	 * ビットマップを取得する
+	 * 
+	 * @return	loadされてないときnull
+	 */
+	public Bitmap getBitmap() {
+		return bmp;
+	}
 	
 	/***************************************************
 	 * 

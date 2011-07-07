@@ -106,14 +106,15 @@ public class GLFieldView extends GLSurfaceView {
 			// テクスチャ要求があればそれを消化
 			if( textureEntry.size() > 0 ) {
 				synchronized( textureEntry ) {
-					// 本当はtexEntryにsyncが必要
-					for( TextureEntry tex : textureEntry ) {
-						graphics.gl = gl;
-						graphics.loadTexture( tex.key, tex.bmp );
-					}
+					graphics.gl = gl;
+					for( TextureEntry tex : textureEntry )
+						graphics.addTexture( tex );
+					
 					// 消化したのでクリア
 					textureEntry.clear();
 				}
+				// 上で登録したテクスチャをGLに転送
+				graphics.loadTexture();
 			}
 			
 			//----------------------------------
@@ -162,6 +163,8 @@ public class GLFieldView extends GLSurfaceView {
 			// テクスチャの復帰
 			// 本当に必要だよね？
 			// しかし復帰処理に、ビットマップの読み込みを含むのかどうかが疑問
+			graphics.gl = gl;
+			graphics.loadTexture();
 
 			//-------------------------------
 			// ビューポートの設定
@@ -182,10 +185,13 @@ public class GLFieldView extends GLSurfaceView {
 			// シグナル
 			surfaceReadySignal.setSignal( Boolean.TRUE );
 		}
-
+		
+		/** Resumeするたびに呼ばれる */
 		@Override
 		public void onSurfaceCreated(GL10 gl, EGLConfig eglconfig) {
 			Log.v("App","GL:Render.surfaceCreated");
+			// テクスチャを削除
+			graphics.deleteAllTexture();
 		}
 	};
 	
@@ -214,14 +220,20 @@ public class GLFieldView extends GLSurfaceView {
 		Log.v("App","GL:surfaceCreated");
 	}
 	
+	
 	/****************************************************
 	 * 
 	 * サーフェイスが破棄された
+	 * アプリ、停止時（pauseではなくonStop）に呼ばれます
 	 * 
 	 */
 	@Override
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		super.surfaceDestroyed(holder);
+		
+		// テクスチャを削除
+		graphics.deleteAllTexture();
+		
 		Log.v("App","GL:surfaceDestroy");
 	}
 }
