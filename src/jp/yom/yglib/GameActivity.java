@@ -50,7 +50,7 @@ public class GameActivity extends Activity implements SensorEventListener {
 	//==============================================================================
 	
 	/** １フレームの時間(ms) */
-	protected long	intervalMillis = 1000 / 24;
+	protected long	intervalMillis = 1000 / 30;
 	
 	/** 終了フラグ */
 	protected boolean	isScenarioRunning = false;
@@ -142,13 +142,13 @@ public class GameActivity extends Activity implements SensorEventListener {
 		
 		//--------------------------------
 		// GLフィールドの作成
-//		{
-//			View	v = findViewById(R.id.GLView);
-//			if( v instanceof GLFieldView ) {
-//				view = (GLFieldView)v;
-//				initGLSurfaceView( view );
-//			}
-//		}
+		{
+			View	v = findViewById(R.id.GLView);
+			if( v instanceof GLFieldView ) {
+				view = (GLFieldView)v;
+				initGLSurfaceView( view );
+			}
+		}
 		
 		//-----------------------------------
 		// ログシステムにTextViewをセット

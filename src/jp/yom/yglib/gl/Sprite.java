@@ -162,7 +162,7 @@ public class Sprite implements YRenderer {
 		gl.glEnable( GL10.GL_BLEND );
 		gl.glBlendFunc( GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA );
 		
-		gl.glBindTexture( GL10.GL_TEXTURE_2D, g.texMap.get(texkey) );
+		g.bindTexture( texkey );
         
 		gl.glVertexPointer( 2, GL10.GL_FLOAT, 0, g.fvbuf4 );
 		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );

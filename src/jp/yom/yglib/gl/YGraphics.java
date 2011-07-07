@@ -34,8 +34,8 @@ public class YGraphics {
 	public final FloatBuffer	fcbuf4;
 	public final FloatBuffer	ftbuf4;
 	
-	
-	final HashMap<String,Integer>	texMap = new HashMap<String,Integer>();
+	/** テクスチャマップ */
+	private final HashMap<String,Integer>	texMap = new HashMap<String,Integer>();
 	
 	
 	public YGraphics() {
@@ -56,7 +56,7 @@ public class YGraphics {
 	 * 
 	 * @return	テクスチャID
 	 */
-	public int bindTexture( Bitmap bmp ) {
+	public void loadTexture( String texKey, Bitmap bmp ) {
 		
 		int[]	textures = new int[1];
 		
@@ -67,9 +67,33 @@ public class YGraphics {
 		gl.glTexParameterf( GL10.GL_TEXTURE_2D, GL10.GL_TEXTURE_MAG_FILTER, GL10.GL_LINEAR );
 		gl.glBindTexture( GL10.GL_TEXTURE_2D, 0 );
 		
-		return textures[0];
+		
+		// 管理Mapに追加
+		texMap.put( texKey, textures[0] );
 	}
 	
+	
+	/*************************************************
+	 * 
+	 * 使用テクスチャを指定
+	 * 
+	 * @param texKey
+	 */
+	public void bindTexture( String texKey ) {
+		gl.glBindTexture( GL10.GL_TEXTURE_2D, texMap.get(texKey) );
+	}
+	
+	
+	/*************************************************
+	 * 
+	 * ロードしたテクスチャを削除
+	 * 
+	 * @param texKey
+	 */
+	public void deleteTexture( String texKey ) {
+		int	num = texMap.remove( texKey );
+		gl.glDeleteTextures( 1, new int[]{ num }, 0 );
+	}
 	
 	/************************************************
 	 * 
