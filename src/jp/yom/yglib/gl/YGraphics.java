@@ -40,7 +40,7 @@ public class YGraphics {
 	
 	public YGraphics() {
 		
-		fvbuf4 = createFloatBuffer(4*2);
+		fvbuf4 = createFloatBuffer(4*3);
 		fcbuf4 = createFloatBuffer(4*4);
 		ftbuf4 = createFloatBuffer(4*2);
 	}
@@ -124,6 +124,28 @@ public class YGraphics {
 	 * @param vertices
 	 * @param colors
 	 */
+	public void drawPoly4( float[] vertices, float[] colors ) {
+		
+		fvbuf4.put( vertices );
+		fvbuf4.position(0);
+		
+		fcbuf4.put( colors );
+		fcbuf4.position(0);
+		
+		gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, fvbuf4 );
+		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
+		gl.glColorPointer( 4, GL10.GL_FLOAT, 0, fcbuf4 );
+		gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
+		gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, 4 );
+	}
+	
+	/************************************************
+	 * 
+	 * 4頂点の矩形、色付き
+	 * 
+	 * @param vertices
+	 * @param colors
+	 */
 	public void drawRect( float[] vertices, float[] colors ) {
 		
 		fvbuf4.put( vertices );
@@ -138,7 +160,6 @@ public class YGraphics {
 		gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
 		gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, 4 );
 	}
-	
 	
 	/**************************************************
 	 * 

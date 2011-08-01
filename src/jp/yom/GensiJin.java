@@ -1,15 +1,14 @@
 package jp.yom;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Arrays;
 
+import jp.yom.blocker.BlockStage;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.ScenarioInterruptException;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.TimeOutException;
 import jp.yom.yglib.YLog;
-import jp.yom.yglib.gl.GLFieldView;
 import jp.yom.yglib.gl.TextureEntry;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
@@ -101,11 +100,65 @@ public class GensiJin extends GameActivity {
 		
 		
 		//-----------------------------------
+		// ブロック崩し編
+		
+		BlockStage	stage = new BlockStage();
+		
+		// ブロックデータ初期化
+		stage.initialize();
+		
+		// 一定時間の間ループ
+		int	nokoriTime = 10*1000;
+		
+		try {
+			while( nokoriTime >= 0 ) {
+
+				YRendererList	rendererList = new YRendererList();
+
+
+				// 1フレームの動き
+				// 当たり判定
+				stage.process( null, this, rendererList );
+
+				// 描画
+				invokeDraw( rendererList );
+
+				//------------------------
+				// 次フレームまで待つ
+				nextFrame();
+				
+				// update a watch point
+				invokeViewUpdater();
+				
+				// 残り秒数を減らす
+				nokoriTime -= intervalMillis;
+			}
+			
+		} catch( ScenarioInterruptException e ) {
+
+		}
+
+		
+		
+		
+		//-----------------------------------
 		// タイトル
 		
 		// テクスチャのセット
 
 
+		
+		//------------------------------------
+		// テクスチャビットマップの解放
+		for( TextureEntry t : ts )
+			t.disposeBitmap();
+		
+		YLog.info("App","GameThread is Finished.");
+	}
+	
+	
+	private void funka() {
+		
 		//-----------------------------------
 		// ステージ１
 		YNode	root = new StageRoot();
@@ -167,12 +220,5 @@ public class GensiJin extends GameActivity {
 
 		}
 		
-		
-		//------------------------------------
-		// テクスチャビットマップの解放
-		for( TextureEntry t : ts )
-			t.disposeBitmap();
-		
-		YLog.info("App","GameThread is Finished.");
 	}
 }

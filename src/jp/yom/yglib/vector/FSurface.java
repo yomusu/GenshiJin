@@ -66,11 +66,30 @@ public class FSurface {
 	}
 	
 	
+	/***************************************************
+	 * 
+	 * 指定されたマトリックスでアフィン変換を行う
+	 * 
+	 * @param mat
+	 * @return
+	 */
+	public void transform( FMatrix mat ) {
+		
+		mat.transform( p0.x, p0.y, p0.z, p0 );
+		mat.transform( p1.x, p1.y, p1.z, p1 );
+		mat.transform( p2.x, p2.y, p2.z, p2 );
+		mat.transform( p3.x, p3.y, p3.z, p3 );
+		
+	}
+	
+	
 	/********************************************
 	 * 
 	 * 線分との交点を求める
 	 * 
 	 * @param line
+	 * 
+	 * @return	交点。nullだったら交わらず
 	 */
 	public FPoint getCrossPoint( FLine line ) {
 		
