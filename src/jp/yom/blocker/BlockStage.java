@@ -2,11 +2,8 @@ package jp.yom.blocker;
 
 import java.util.ArrayList;
 
-import javax.microedition.khronos.opengles.GL10;
-
-import android.opengl.GLU;
-
 import jp.yom.yglib.GameActivity;
+import jp.yom.yglib.gl.Camera3D;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
@@ -27,6 +24,21 @@ import jp.yom.yglib.vector.FVector;
  * ・ブロックのデータ保持＆配置
  * 
  * 
+ * やること
+ * ・透視変換＆カメラ位置
+ * ・Blockクラス
+ * ・Blockのレンダリング
+ * ・ライティング…環境光
+ * ・床
+ * ・ボールの配置
+ * ・ボールを動かす＆外壁に当たり判定
+ * ・ブロックとボールの当たり判定
+ * ・バー配置
+ * ・バー移動
+ * ・バーとボールの当たり判定
+ * ・ブロックの破壊
+ * ・ゲームクリア判定
+ * 
  * 
  * @author matsumoto
  *
@@ -37,7 +49,7 @@ public class BlockStage extends YNode {
 	/** ブロックのリスト */
 	ArrayList<Block>	blockList = new ArrayList<Block>();
 	/** カメラのレンダラ */
-	protected final CameraRender	cameraRender = new CameraRender();
+	protected final Camera3D	cameraRender = new Camera3D();
 	/** 背景のレンダラ */
 	protected final BackGroundRender	bgRender = new BackGroundRender();
 	
@@ -110,70 +122,6 @@ public class BlockStage extends YNode {
 	}
 }
 
-
-/****************************************************
- * 
- * 
- * カメラをレンダラ
- * 
- * 透視変換も行います
- * 
- * 
- */
-class CameraRender implements YRenderer {
-	
-	/** カメラ位置 */
-	FPoint	campos = new FPoint( 0, 50, -50 );
-	/** 対象位置 */
-	FPoint	objpos = new FPoint( 0, 0, 0 );		// 原点
-	/** カメラ向き */
-	FVector	camdir = new FVector( 0, 1, 0 );	// Yが上になるように
-	
-	public void setPosition( float x, float y ) {
-	}
-	
-	@Override
-	public void render(YGraphics g) {
-		
-		g.gl.glMatrixMode( GL10.GL_PROJECTION );
-		g.gl.glLoadIdentity();
-		
-		
-		// 透視変換…Zの向きが逆というウワサあり
-		GLU.gluPerspective( g.gl, 120.0f, 1.0f, 1.0f, 100.0f );
-		
-		// カメラ位置…MODELVIEWというウワサあり
-		GLU.gluLookAt( g.gl,
-				campos.x, campos.y, campos.z,
-				objpos.x, objpos.y, objpos.z,
-				camdir.x, camdir.y, camdir.z
-		);
-		
-		g.gl.glMatrixMode( GL10.GL_MODELVIEW );
-		
-		
-		
-		// テストデータ
-		float	w = 10;
-		float	h = 10;
-		float	z = 30;
-		
-		float[]	vertices = new float[]{
-				-w/2, h/2, z,
-				 w/2, h/2, z,
-				-w/2, -h/2, z,
-				 w/2, -h/2, z,
-		};
-		float[]	colors = {
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-		};
-
-		g.drawPoly4( vertices, colors );
-	}
-}
 
 
 /****************************************************
