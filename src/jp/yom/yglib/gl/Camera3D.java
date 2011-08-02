@@ -47,7 +47,7 @@ public class Camera3D implements YRenderer {
 		
 		
 		// 透視変換…Zの向きが逆というウワサあり
-		GLU.gluPerspective( g.gl, 120.0f, 1.0f, 1.0f, 100.0f );
+		GLU.gluPerspective( g.gl, 120.0f, 4f/3f, 1.0f, 100.0f );
 		
 		// カメラ位置…MODELVIEWというウワサあり
 		GLU.gluLookAt( g.gl,
@@ -61,9 +61,9 @@ public class Camera3D implements YRenderer {
 		
 		
 		// テストデータ
-		float	w = 10;
-		float	h = 10;
-		float	z = 30;
+		float	w = 30;
+		float	h = 30;
+		float	z = 0;
 		
 		float[]	vertices = new float[]{
 				-w/2, h/2, z,
@@ -78,6 +78,6 @@ public class Camera3D implements YRenderer {
 				1.0f, 1.0f, 1.0f, 1f,
 		};
 
-		g.drawPoly4( vertices, colors );
+	//	g.drawPoly4( vertices, colors );
 	}
 }

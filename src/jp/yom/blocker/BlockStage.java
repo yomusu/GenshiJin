@@ -80,6 +80,8 @@ public class BlockStage extends YNode {
 		
 		Block	block = new Block();
 		block.transform( mat );
+		
+		blockList.add( block );
 	}
 	
 	
@@ -96,6 +98,9 @@ public class BlockStage extends YNode {
 		
 	}
 	
+	
+	float	radZ = 0f;
+	
 	/**********************************************************
 	 * 
 	 * 
@@ -108,6 +113,16 @@ public class BlockStage extends YNode {
 		super.process(parent, app, renderList);
 		
 		
+		// 試しに回転
+		radZ = (float)((3.14/180.0) * 1);
+		
+		FMatrix	mat = new FMatrix();
+		mat.unit();
+		mat.rotateY( radZ );
+		
+		blockList.get(0).transform( mat );
+		
+		
 		// カメラのレンダラをセット
 		renderList.add( 10001, cameraRender );
 		
@@ -115,10 +130,10 @@ public class BlockStage extends YNode {
 		//renderList.add( 10000, bgRender );
 		
 		// レンダラリスト登録
-//		for( Block block : blockList ) {
-//			float	z = 0f;
-//			renderList.add( z, block );
-//		}
+		for( Block block : blockList ) {
+			float	z = 0f;
+			renderList.add( z, block );
+		}
 	}
 }
 
@@ -183,25 +198,25 @@ class Block implements YRenderer {
 	public Block( ) {
 		
 		// 幅
-		int	w = 50;	// X
-		// 高さ(Z)
-		int	h = 30;	// Z
+		int	w = 20;	// X
+		// 高さ(Y)
+		int	h = 30;	// Y
 		// 奥行き
-		int	d = 20;	// Y
+		int	d = 20;	// Z
 		
 		int	hw = w / 2;	// X
 		int	hd = d / 2;	// Y
 		
 		// 底面の４点
 		FPoint	ptb[] = new FPoint[] {
-				new FPoint(-hw,hd,0), new FPoint(hw,hd,0),
-				new FPoint(-hw,-hd,0), new FPoint(hw,-hd,0)
+				new FPoint(-hw,0,hd), new FPoint(hw,0,hd),
+				new FPoint(-hw,0,-hd), new FPoint(hw,0,-hd)
 		};
 		
 		// 天井の４点
 		FPoint	ptc[] = new FPoint[] {
-				new FPoint(-hw,hd,h), new FPoint(hw,hd,h),
-				new FPoint(-hw,-hd,h), new FPoint(hw,-hd,h)
+				new FPoint(-hw,h,hd), new FPoint(hw,h,hd),
+				new FPoint(-hw,h,-hd), new FPoint(hw,h,-hd)
 		};
 		
 		surfaces = new FSurface[] {
@@ -271,10 +286,10 @@ class Block implements YRenderer {
 	
 	/** 頂点色データ */
 	float[]	colors = {
-			1.0f, 1.0f, 1.0f, 1f,
-			1.0f, 1.0f, 1.0f, 1f,
-			1.0f, 1.0f, 1.0f, 1f,
-			1.0f, 1.0f, 1.0f, 1f,
+			1.0f, 1.0f, 0.0f, 1f,
+			1.0f, 1.0f, 0.0f, 1f,
+			1.0f, 1.0f, 0.0f, 1f,
+			1.0f, 1.0f, 0.0f, 1f,
 	};
 	
 	
