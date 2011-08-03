@@ -123,10 +123,10 @@ public class GLFieldView extends GLSurfaceView {
 			gl.glDisable( GL10.GL_TEXTURE_2D );
 			gl.glDisable( GL10.GL_BLEND );
 
-	        gl.glHint( GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_FASTEST );
-	        gl.glShadeModel(GL10.GL_SMOOTH);
-	        gl.glDisable(GL10.GL_DEPTH_TEST);
-	        gl.glDisable(GL10.GL_LIGHTING );
+			gl.glHint( GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_FASTEST );
+			gl.glShadeModel(GL10.GL_SMOOTH);
+			gl.glDisable(GL10.GL_DEPTH_TEST);
+			gl.glDisable(GL10.GL_LIGHTING );
 			
 			// 透視変換の設定
 			gl.glMatrixMode( GL10.GL_PROJECTION );

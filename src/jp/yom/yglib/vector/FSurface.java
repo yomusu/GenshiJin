@@ -80,6 +80,7 @@ public class FSurface {
 		mat.transform( p2.x, p2.y, p2.z, p2 );
 		mat.transform( p3.x, p3.y, p3.z, p3 );
 		
+		normalize();
 	}
 	
 	

@@ -30,6 +30,7 @@ public class YGraphics {
 
 	public GL10	gl;
 	
+	public final FloatBuffer	fnbuf4;
 	public final FloatBuffer	fvbuf4;
 	public final FloatBuffer	fcbuf4;
 	public final FloatBuffer	ftbuf4;
@@ -40,6 +41,7 @@ public class YGraphics {
 	
 	public YGraphics() {
 		
+		fnbuf4 = createFloatBuffer(4*3);
 		fvbuf4 = createFloatBuffer(4*3);
 		fcbuf4 = createFloatBuffer(4*4);
 		ftbuf4 = createFloatBuffer(4*2);
@@ -117,9 +119,76 @@ public class YGraphics {
 		}
 	}
 	
+	
+	/*************************************************
+	 * 
+	 * 隠面消去を使うかどうか
+	 * Zバッファ
+	 * 
+	 * @param isEnable
+	 */
+	public void depthTest( boolean isEnable ) {
+		
+		if( isEnable )
+			gl.glEnable( GL10.GL_DEPTH_TEST );
+		else
+			gl.glDisable( GL10.GL_DEPTH_TEST );
+
+	}
+	
+	
 	/************************************************
 	 * 
-	 * 4頂点の矩形、色付き
+	 * 背面消去を使うかどうか
+	 * 
+	 * @param isEnable
+	 */
+	public void cullFace( boolean isEnable ) {
+		
+		if( isEnable )
+			gl.glEnable( GL10.GL_CULL_FACE );
+		else
+			gl.glDisable( GL10.GL_CULL_FACE );
+	}
+	
+	/************************************************
+	 * 
+	 * 3次元の4頂点の矩形、法線、色付き
+	 * 
+	 * @param vertices
+	 * @param colors
+	 */
+	public void drawPoly4( float[] vertices, float[] normals, float[] colors ) {
+		
+		fnbuf4.put( normals );
+		fnbuf4.position(0);
+		
+		fvbuf4.put( vertices );
+		fvbuf4.position(0);
+		
+		fcbuf4.put( colors );
+		fcbuf4.position(0);
+		
+		
+		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
+		gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
+		gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
+		
+		gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, fvbuf4 );
+		gl.glNormalPointer( GL10.GL_FLOAT, 0, fnbuf4 );
+		gl.glColorPointer( 4, GL10.GL_FLOAT, 0, fcbuf4 );
+		
+		gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, 4 );
+		
+		gl.glDisableClientState( GL10.GL_COLOR_ARRAY );
+		gl.glDisableClientState( GL10.GL_NORMAL_ARRAY );
+		gl.glDisableClientState( GL10.GL_VERTEX_ARRAY );
+		
+	}
+	
+	/************************************************
+	 * 
+	 * 3次元の4頂点の矩形、色付き
 	 * 
 	 * @param vertices
 	 * @param colors
@@ -141,7 +210,7 @@ public class YGraphics {
 	
 	/************************************************
 	 * 
-	 * 4頂点の矩形、色付き
+	 * 2次元の4頂点の矩形、色付き
 	 * 
 	 * @param vertices
 	 * @param colors

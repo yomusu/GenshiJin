@@ -2,6 +2,8 @@ package jp.yom.blocker;
 
 import java.util.ArrayList;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Camera3D;
 import jp.yom.yglib.gl.YGraphics;
@@ -283,6 +285,7 @@ class Block implements YRenderer {
 	
 	/** レンダリング用頂点座標バッファ */
 	float[]	vertices = new float[4*3];
+	float[]	normals  = new float[4*3];
 	
 	/** 頂点色データ */
 	float[]	colors = {
@@ -301,26 +304,75 @@ class Block implements YRenderer {
 	@Override
 	public void render(YGraphics g) {
 		
+		g.depthTest( true );
+		g.cullFace( true );
+		
+		float[]	lit_amb = new float[]{1.0f, 0.0f, 1.0f, 0.0f};
+		float[]	lit_dif = new float[]{1.0f, 1.0f, 1.0f, 0.0f};
+		float[]	lit_spc = new float[]{1.0f, 1.0f, 1.0f, 0.0f};
+		float[]	lit_pos = new float[]{1.0f, 1.0f, 1.0f, 0.0f};
+		
+		float[]	mat_amb = new float[]{0.2f, 0.2f, 0.2f, 0.0f};
+		float[]	mat_dif = new float[]{0.6f, 0.6f, 0.6f, 0.0f};
+		float[]	mat_spc = new float[]{0.2f, 0.2f, 0.2f, 0.0f};
+		float[]	mat_emi = new float[]{0.0f, 0.0f, 0.0f, 0.0f};
+		float[]	mat_shi = new float[]{30.0f};
+		
+		// ライティング
+		g.gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_AMBIENT, lit_amb,0);
+		g.gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_DIFFUSE, lit_dif,0);
+		g.gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_SPECULAR, lit_spc,0);
+		g.gl.glLightfv(GL10.GL_LIGHT0, GL10.GL_POSITION, lit_pos,0);
+		
+		g.gl.glEnable(GL10.GL_LIGHT0);
+		g.gl.glEnable(GL10.GL_LIGHTING);
+
+		g.gl.glMaterialfv(GL10.GL_FRONT, GL10.GL_AMBIENT, mat_amb,0);
+		g.gl.glMaterialfv(GL10.GL_FRONT, GL10.GL_DIFFUSE, mat_dif,0);
+		g.gl.glMaterialfv(GL10.GL_FRONT, GL10.GL_SPECULAR, mat_spc,0);
+		g.gl.glMaterialfv(GL10.GL_FRONT, GL10.GL_SHININESS, mat_shi,0);
+		g.gl.glMaterialfv(GL10.GL_FRONT, GL10.GL_EMISSION, mat_emi,0);
+		
 		// サーフェスから
 		for( FSurface s : surfaces ) {
+			
+			normals[0] = s.normal.x;
+			normals[1] = s.normal.y;
+			normals[2] = s.normal.z;
 			
 			vertices[0] = s.p0.x;
 			vertices[1] = s.p0.y;
 			vertices[2] = s.p0.z;
 			
+			normals[3] = s.normal.x;
+			normals[4] = s.normal.y;
+			normals[5] = s.normal.z;
+			
 			vertices[3] = s.p1.x;
 			vertices[4] = s.p1.y;
 			vertices[5] = s.p1.z;
+			
+			normals[6] = s.normal.x;
+			normals[7] = s.normal.y;
+			normals[8] = s.normal.z;
 			
 			vertices[6] = s.p2.x;
 			vertices[7] = s.p2.y;
 			vertices[8] = s.p2.z;
 			
+			normals[9] = s.normal.x;
+			normals[10] = s.normal.y;
+			normals[11] = s.normal.z;
+			
 			vertices[9] = s.p3.x;
 			vertices[10] = s.p3.y;
 			vertices[11] = s.p3.z;
 			
-			g.drawPoly4( vertices, colors );
+			g.drawPoly4( vertices, normals, colors );
 		}
+		
+		
+		g.cullFace( false );
+		g.depthTest( false );
 	}
 }
