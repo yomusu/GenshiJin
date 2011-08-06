@@ -7,7 +7,8 @@ import java.util.HashMap;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import android.graphics.Bitmap;
+import jp.yom.yglib.vector.FMatrix;
+
 import android.opengl.GLUtils;
 
 
@@ -127,6 +128,22 @@ public class YGraphics {
 	 * 
 	 * @param isEnable
 	 */
+	public void lighting( boolean isEnable ) {
+		
+		if( isEnable )
+			gl.glEnable( GL10.GL_LIGHTING );
+		else
+			gl.glDisable( GL10.GL_LIGHTING );
+
+	}
+	
+	/*************************************************
+	 * 
+	 * 隠面消去を使うかどうか
+	 * Zバッファ
+	 * 
+	 * @param isEnable
+	 */
 	public void depthTest( boolean isEnable ) {
 		
 		if( isEnable )
@@ -151,32 +168,74 @@ public class YGraphics {
 			gl.glDisable( GL10.GL_CULL_FACE );
 	}
 	
+	
+	/**********************************************
+	 * 
+	 * マトリックスを適用する
+	 * 
+	 * 現在のマトリックスに乗算する
+	 * 
+	 * @param mat
+	 */
+	public void mulMatrix( FMatrix mat ) {
+		
+		matrix[0] = mat.m00;
+		matrix[1] = mat.m01;
+		matrix[2] = mat.m02;
+		matrix[3] = mat.m03;
+		
+		matrix[4] = mat.m10;
+		matrix[5] = mat.m11;
+		matrix[6] = mat.m12;
+		matrix[7] = mat.m13;
+		
+		matrix[8] = mat.m20;
+		matrix[9] = mat.m21;
+		matrix[10] = mat.m22;
+		matrix[11] = mat.m23;
+		
+		matrix[12] = mat.m30;
+		matrix[13] = mat.m31;
+		matrix[14] = mat.m32;
+		matrix[15] = mat.m33;
+		
+		gl.glMultMatrixf( matrix, 0 );
+	}
+	
+	final private float[]	matrix = new float[16];
+	
+	
 	/************************************************
 	 * 
 	 * 3次元の4頂点の矩形、法線、色付き
 	 * 
-	 * @param vertices
-	 * @param colors
+	 * @param vertices	頂点。省略不可
+	 * @param normals	法線。省略可能
+	 * @param colors	頂点色。省略可能
+	 * 
 	 */
 	public void drawPoly4( float[] vertices, float[] normals, float[] colors ) {
 		
-		fnbuf4.put( normals );
-		fnbuf4.position(0);
+		if( normals!=null ) {
+			fnbuf4.put( normals );
+			fnbuf4.position(0);
+			gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
+			gl.glNormalPointer( GL10.GL_FLOAT, 0, fnbuf4 );
+		}
+		
+		if( colors!=null ) {
+			fcbuf4.put( colors );
+			fcbuf4.position(0);
+			gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
+			gl.glColorPointer( 4, GL10.GL_FLOAT, 0, fcbuf4 );
+		}
 		
 		fvbuf4.put( vertices );
 		fvbuf4.position(0);
 		
-		fcbuf4.put( colors );
-		fcbuf4.position(0);
-		
-		
 		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
-		gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
-		gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
-		
 		gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, fvbuf4 );
-		gl.glNormalPointer( GL10.GL_FLOAT, 0, fnbuf4 );
-		gl.glColorPointer( 4, GL10.GL_FLOAT, 0, fcbuf4 );
+		
 		
 		gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, 4 );
 		
@@ -184,28 +243,6 @@ public class YGraphics {
 		gl.glDisableClientState( GL10.GL_NORMAL_ARRAY );
 		gl.glDisableClientState( GL10.GL_VERTEX_ARRAY );
 		
-	}
-	
-	/************************************************
-	 * 
-	 * 3次元の4頂点の矩形、色付き
-	 * 
-	 * @param vertices
-	 * @param colors
-	 */
-	public void drawPoly4( float[] vertices, float[] colors ) {
-		
-		fvbuf4.put( vertices );
-		fvbuf4.position(0);
-		
-		fcbuf4.put( colors );
-		fcbuf4.position(0);
-		
-		gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, fvbuf4 );
-		gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
-		gl.glColorPointer( 4, GL10.GL_FLOAT, 0, fcbuf4 );
-		gl.glEnableClientState( GL10.GL_COLOR_ARRAY );
-		gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, 4 );
 	}
 	
 	/************************************************

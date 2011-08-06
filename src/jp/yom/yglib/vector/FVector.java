@@ -45,6 +45,23 @@ public class FVector {
 		z = src.z;
 	}
 	
+	
+	/***************************************
+	 * 
+	 * 一回でセットする
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public FVector set( float x, float y, float z ) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		return this;
+	}
+	
 	/****************************************
 	 * 
 	 * ベクトル同士の足し算

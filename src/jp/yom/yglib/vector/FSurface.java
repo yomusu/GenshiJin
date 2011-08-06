@@ -1,5 +1,7 @@
 package jp.yom.yglib.vector;
 
+import android.util.Log;
+
 
 /*********************************************
  * 
@@ -99,6 +101,12 @@ public class FSurface {
 		// 交点との距離を求める
 		float	d0 = getDistance( line.p0 );
 		float	d1 = getDistance( line.p1 );
+		
+		// 符号が同じだったら交差していない
+		if( d0<0 && d1<0 )
+			return null;
+		if( d0>0 && d1>0 )
+			return null;
 		
 		// 交点との距離を線分のベクトルに適用し、交点を割り出す
 		FVector	v = new FVector( line.p0, line.p1 ).normalize().scale( Math.abs(d0) );

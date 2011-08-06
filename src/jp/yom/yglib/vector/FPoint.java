@@ -53,6 +53,22 @@ public class FPoint {
 	}
 	
 	
+	/***************************************
+	 * 
+	 * 一回でセットする
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
+	public FPoint set( float x, float y, float z ) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+		return this;
+	}
+	
 	/**************************************
 	 * 
 	 * 座標にベクトルを足す

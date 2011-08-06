@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import jp.yom.blocker.BlockStage;
+import jp.yom.blocker.BlockerBall;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.ScenarioInterruptException;
 import jp.yom.yglib.StopWatch;
@@ -12,6 +13,8 @@ import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.TextureEntry;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
+import jp.yom.yglib.vector.FLine;
+import jp.yom.yglib.vector.FPoint;
 import android.widget.TextView;
 
 
@@ -27,9 +30,6 @@ import android.widget.TextView;
  */
 public class GensiJin extends GameActivity {
 	
-	
-	/** ボール */
-	Ball	ball;
 	
 	DecimalFormat	cpuPowerFormat = new DecimalFormat("000.0%");
 	
@@ -102,13 +102,14 @@ public class GensiJin extends GameActivity {
 		//-----------------------------------
 		// ブロック崩し編
 		
+		// ステージ
 		BlockStage	stage = new BlockStage();
-		
 		// ブロックデータ初期化
 		stage.initialize();
 		
+		
 		// 一定時間の間ループ
-		int	nokoriTime = 10*1000;
+		int	nokoriTime = 20*1000;
 		
 		try {
 			while( nokoriTime >= 0 ) {
@@ -117,9 +118,10 @@ public class GensiJin extends GameActivity {
 
 
 				// 1フレームの動き
-				// 当たり判定
+				
+				// ステージ
 				stage.process( null, this, rendererList );
-
+				
 				// 描画
 				invokeDraw( rendererList );
 

@@ -22,15 +22,24 @@ import android.opengl.GLU;
  * @author matsumoto
  *
  */
-public class Camera3D implements YRenderer {
+public class Camera implements YRenderer {
 
 	/** カメラ位置 */
-	FPoint	campos = new FPoint( 0, 50, -50 );
+	public FPoint	campos = new FPoint( 0, 50, -50 );
 	/** 対象位置 */
-	FPoint	objpos = new FPoint( 0, 0, 0 );		// 原点
+	public FPoint	objpos = new FPoint( 0, 0, 0 );		// 原点
 	/** カメラ向き */
-	FVector	camdir = new FVector( 0, 1, 0 );	// Yが上になるように
+	public FVector	camdir = new FVector( 0, 1, 0 );	// Yが上になるように
 	
+	
+	/** Farクリップ */
+	public float	far = 1000f;
+	
+	/** Nearクリップ */
+	public float	near = 1;
+	
+	/** 透視角Y(deg) */
+	public float	fovy = 60f;
 	
 	
 	/*************************************************
@@ -47,7 +56,7 @@ public class Camera3D implements YRenderer {
 		
 		
 		// 透視変換…Zの向きが逆というウワサあり
-		GLU.gluPerspective( g.gl, 120.0f, 4f/3f, 1.0f, 100.0f );
+		GLU.gluPerspective( g.gl, fovy, 4f/3f, near, far );
 		
 		// カメラ位置…MODELVIEWというウワサあり
 		GLU.gluLookAt( g.gl,
@@ -58,26 +67,5 @@ public class Camera3D implements YRenderer {
 		
 		g.gl.glMatrixMode( GL10.GL_MODELVIEW );
 		
-		
-		
-		// テストデータ
-		float	w = 30;
-		float	h = 30;
-		float	z = 0;
-		
-		float[]	vertices = new float[]{
-				-w/2, h/2, z,
-				 w/2, h/2, z,
-				-w/2, -h/2, z,
-				 w/2, -h/2, z,
-		};
-		float[]	colors = {
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-				1.0f, 1.0f, 1.0f, 1f,
-		};
-
-	//	g.drawPoly4( vertices, colors );
 	}
 }
