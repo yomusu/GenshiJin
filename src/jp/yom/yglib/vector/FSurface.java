@@ -1,6 +1,5 @@
 package jp.yom.yglib.vector;
 
-import android.util.Log;
 
 
 /*********************************************
@@ -94,13 +93,23 @@ public class FSurface {
 	 * 
 	 * @return	交点。nullだったら交わらず
 	 */
-	public FPoint getCrossPoint( FLine line ) {
+	public FPoint getCrossPoint( FLine line, float thickness ) {
 		
 		// 線分が自身の無限面と交差しているか判定
 		
+		//--------------------------------
 		// 交点との距離を求める
 		float	d0 = getDistance( line.p0 );
 		float	d1 = getDistance( line.p1 );
+		
+		// 太さを適用
+		if( d0 >= 0 ) {
+			d0 -= thickness;
+			d1 -= thickness;
+		} else {
+			d0 += thickness;
+			d1 += thickness;
+		}
 		
 		// 符号が同じだったら交差していない
 		if( d0<0 && d1<0 )
@@ -108,13 +117,13 @@ public class FSurface {
 		if( d0>0 && d1>0 )
 			return null;
 		
+		//--------------------------------
 		// 交点との距離を線分のベクトルに適用し、交点を割り出す
 		FVector	v = new FVector( line.p0, line.p1 ).normalize().scale( Math.abs(d0) );
 		FPoint	p = new FPoint(line.p0).add(v);
 		
+		//--------------------------------
 		// 交点が面を構成する線分の内側にいるかどうか判定
-		
-		
 		FVector	v0 = new FVector( p0, p1 ).getCross( new FVector( p0, p ) );
 		FVector	v1 = new FVector( p1, p3 ).getCross( new FVector( p1, p ) );
 		FVector	v2 = new FVector( p3, p2 ).getCross( new FVector( p3, p ) );
@@ -129,6 +138,14 @@ public class FSurface {
 			return p;
 		if( f0<=0 && f1<=0 && f2<=0 && f3<=0 )
 			return p;
+		
+		//--------------------------------
+		// 交点が、外側だがthicknessより内側にあるときは
+		
+		// p0～p3の点との距離がthickness以内なら角にヒット
+		
+		// 直線p0-p2及びp1-p3の内側にあり、直線p0-p1もしくはp2-p3との距離がthickness以内なら
+		
 		
 		return null;
 	}
@@ -168,9 +185,9 @@ public class FSurface {
 		//s.normal = new FVector(0,0,1f);
 		System.out.println( "法線ベクトル:"+s.normal );
 		
-		System.out.println( "交点0"+s.getCrossPoint( new FLine( new FPoint(15,5,-1f), new FPoint(15,5,1f) ) ) );
-		System.out.println( "交点1"+s.getCrossPoint( new FLine( new FPoint(10,10,-1f), new FPoint(10,10,1f) ) ) );
-		System.out.println( "交点2"+s.getCrossPoint( new FLine( new FPoint(10f,1,-1f), new FPoint(10.1f,1,1f) ) ) );
+		System.out.println( "交点0"+s.getCrossPoint( new FLine( new FPoint(15,5,-1f), new FPoint(15,5,1f) ),1 ) );
+		System.out.println( "交点1"+s.getCrossPoint( new FLine( new FPoint(10,10,-1f), new FPoint(10,10,1f) ),1 ) );
+		System.out.println( "交点2"+s.getCrossPoint( new FLine( new FPoint(10f,1,-1f), new FPoint(10.1f,1,1f) ),1 ) );
 		
 		
 		System.out.println( s.isBack( new FVector(0,0,1f) ) );

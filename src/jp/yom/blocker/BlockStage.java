@@ -3,7 +3,6 @@ package jp.yom.blocker;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -158,7 +157,7 @@ public class BlockStage extends YNode implements YRenderer {
 		SurfaceIterator	it = new SurfaceIterator( floor.surfaces );
 		while( it.hasNext() ) {
 			
-			if( it.nextAtari( ball.line) ) {
+			if( it.nextAtari(ball.line,10) ) {
 				
 				// 続いて残りの移動距離を反射させる
 				FVector	nokori = new FVector( it.cp, ball.line.p1 ).reflection( it.s.normal );
@@ -334,44 +333,22 @@ class Floor {
 		
 		model.material = mate;
 	}
-	
-	/*************************************************
-	 * 
-	 * 線分との当たり判定を行う
-	 * 
-	 * @param p1	終点
-	 * @param p0	始点
-	 * 
-	 * @return	交点。当たらなかったらnull。
-	 */
-	public FPoint atariLine( FLine ballLine ) {
-		
-		FVector	lineDir = ballLine.toVector();
-		
-		// すべての面に対して…
-		for( FSurface s : surfaces ) {
-			
-			// 背面ではなかったら
-			if( s.isBack( lineDir )==false ) {
-				
-				// 交点計算を行う
-				FPoint	p = s.getCrossPoint( ballLine );
-				
-				if( p!=null )
-					return p;
-			}
-		}
-		
-		return null;
-	}
 }
 
+/****************************************
+ * 
+ * 当たり判定のための面イテレータ
+ * 
+ * @author Yomusu
+ *
+ */
 class SurfaceIterator {
 	
 	Iterator<FSurface>	it;
 	
 	public FSurface	s;
 	public FPoint		cp;
+	
 	
 	public SurfaceIterator( FSurface[] a ) {
 		this.it = Arrays.asList( a ).iterator();
@@ -381,7 +358,8 @@ class SurfaceIterator {
 		return it.hasNext();
 	}
 	
-	public boolean nextAtari( FLine ballLine ) {
+	/** 次の面を当たり判定します */
+	public boolean nextAtari( FLine ballLine, float thickness ) {
 		
 		s = it.next();
 		
@@ -389,7 +367,7 @@ class SurfaceIterator {
 		if( s.isBack( ballLine.toVector() )==false ) {
 			
 			// 交点計算を行う
-			cp = s.getCrossPoint( ballLine );
+			cp = s.getCrossPoint( ballLine, thickness );
 			
 			if( cp!=null )
 				return true;
@@ -488,35 +466,5 @@ class Block {
 		for( FSurface s : surfaces )
 			s.transform( mat );
 		
-	}
-	
-	/*************************************************
-	 * 
-	 * 線分との当たり判定を行う
-	 * 
-	 * @param p1	終点
-	 * @param p0	始点
-	 * 
-	 * @return	交点。当たらなかったらnull。
-	 */
-	public FPoint atariLine( FLine ballLine ) {
-		
-		FVector	lineDir = ballLine.toVector();
-		
-		// すべての面に対して…
-		for( FSurface s : surfaces ) {
-			
-			// 背面ではなかったら
-			if( s.isBack( lineDir )==false ) {
-				
-				// 交点計算を行う
-				FPoint	p = s.getCrossPoint( ballLine );
-				
-				if( p!=null )
-					return p;
-			}
-		}
-		
-		return null;
 	}
 }

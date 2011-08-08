@@ -4,17 +4,17 @@ import java.text.DecimalFormat;
 import java.util.Arrays;
 
 import jp.yom.blocker.BlockStage;
-import jp.yom.blocker.BlockerBall;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.ScenarioInterruptException;
+import jp.yom.yglib.SlideWatcher;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.TimeOutException;
 import jp.yom.yglib.YLog;
 import jp.yom.yglib.gl.TextureEntry;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
-import jp.yom.yglib.vector.FLine;
-import jp.yom.yglib.vector.FPoint;
+import jp.yom.yglib.vector.FVector;
+import android.util.Log;
 import android.widget.TextView;
 
 
@@ -32,6 +32,10 @@ public class GensiJin extends GameActivity {
 	
 	
 	DecimalFormat	cpuPowerFormat = new DecimalFormat("000.0%");
+	
+	/** モーションイベントキャッシュ */
+	SlideWatcher	slideWatcher = new SlideWatcher();
+	
 	
 	/*************************************************************
 	 * 
@@ -111,12 +115,15 @@ public class GensiJin extends GameActivity {
 		// 一定時間の間ループ
 		int	nokoriTime = 20*1000;
 		
+		// 入力開始
+		view.setTouchListener( slideWatcher );
+		
 		try {
 			while( nokoriTime >= 0 ) {
 
 				YRendererList	rendererList = new YRendererList();
-
-
+				
+				
 				// 1フレームの動き
 				
 				// ステージ
@@ -124,7 +131,11 @@ public class GensiJin extends GameActivity {
 				
 				// 描画
 				invokeDraw( rendererList );
-
+				
+				// スライドタッチイベント取得
+				FVector	slide = slideWatcher.popLastSlide();
+				Log.v( "App", "slide"+slide );
+				
 				//------------------------
 				// 次フレームまで待つ
 				nextFrame();
@@ -139,7 +150,8 @@ public class GensiJin extends GameActivity {
 		} catch( ScenarioInterruptException e ) {
 
 		}
-
+		
+		view.setTouchListener( null );
 		
 		
 		
