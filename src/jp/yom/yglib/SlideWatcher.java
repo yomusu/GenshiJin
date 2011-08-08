@@ -1,7 +1,9 @@
 package jp.yom.yglib;
 
 import jp.yom.yglib.gl.GLFieldView.TouchListener;
+import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FVector;
+import android.util.Log;
 import android.view.MotionEvent;
 
 
@@ -16,12 +18,9 @@ import android.view.MotionEvent;
  */
 public class SlideWatcher implements TouchListener {
 	
+	FPoint	lastPoint = new FPoint();
+	FPoint	beforePoint = new FPoint();
 	
-	float	down_x;
-	float	down_y;
-	
-	float	slide_x;
-	float	slide_y;
 	
 	
 	
@@ -34,10 +33,9 @@ public class SlideWatcher implements TouchListener {
 	 */
 	public FVector popLastSlide() {
 		
-		FVector	result = new FVector( slide_x, slide_y, 0f );
+		FVector	result = new FVector( beforePoint, lastPoint );
 		
-		slide_x = 0;
-		slide_y = 0;
+		beforePoint.set( lastPoint );
 		
 		return result;
 	}
@@ -52,13 +50,13 @@ public class SlideWatcher implements TouchListener {
 		
 		switch( event.getAction() ) {
 		case MotionEvent.ACTION_DOWN:
-			down_x = event.getX();
-			down_y = event.getY();
+			lastPoint.set( event.getX(), event.getY(), 0 );
+			beforePoint.set( lastPoint );
 			return true;
 			
 		case MotionEvent.ACTION_MOVE:
-			slide_x = event.getX() - down_x;
-			slide_y = event.getY() - down_y;
+			beforePoint.set( lastPoint );
+			lastPoint.set( event.getX(), event.getY(), 0 );
 			return true;
 			
 		case MotionEvent.ACTION_UP:

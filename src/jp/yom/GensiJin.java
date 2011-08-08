@@ -126,15 +126,15 @@ public class GensiJin extends GameActivity {
 				
 				// 1フレームの動き
 				
+				// スライドタッチイベント取得
+				FVector	slide = slideWatcher.popLastSlide();
+				stage.bar.move( slide );
+				
 				// ステージ
 				stage.process( null, this, rendererList );
 				
 				// 描画
 				invokeDraw( rendererList );
-				
-				// スライドタッチイベント取得
-				FVector	slide = slideWatcher.popLastSlide();
-				Log.v( "App", "slide"+slide );
 				
 				//------------------------
 				// 次フレームまで待つ

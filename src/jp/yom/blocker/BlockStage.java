@@ -70,6 +70,9 @@ public class BlockStage extends YNode implements YRenderer {
 	/** ボール */
 	BlockerBall	ball = null;
 	
+	/** バー */
+	public RacketBar		bar = null;
+	
 	
 	/**********************************************************
 	 * 
@@ -120,6 +123,10 @@ public class BlockStage extends YNode implements YRenderer {
 		//------------------------------
 		// ボール
 		ball = new BlockerBall();
+		
+		//------------------------------
+		// バー
+		bar = new RacketBar();
 	}
 	
 	
@@ -176,7 +183,11 @@ public class BlockStage extends YNode implements YRenderer {
 			}
 		}
 		
-		ball.process( parent, app, renderList ); 
+		ball.process( parent, app, renderList );
+		
+		//------------------------
+		// バー
+		bar.process( parent, app, renderList );
 	}
 	
 	
