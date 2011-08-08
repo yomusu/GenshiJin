@@ -8,15 +8,11 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import jp.yom.yglib.YSignal;
-
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Bitmap.Config;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 
 
@@ -33,6 +29,32 @@ import android.view.SurfaceHolder;
 public class GLFieldView extends GLSurfaceView {
 	
 	
+	//====================================================
+	// 外部公開インターフェースの宣言
+	//====================================================
+	
+	public interface TouchListener {
+		
+		/** タッチイベントを */
+		public boolean onTouchEvent( MotionEvent event );
+	}
+	
+	
+	//====================================================
+	// シグナルの宣言
+	//====================================================
+	
+	/** サーフェースが作成されたシグナル */
+	public final YSignal<Boolean>	surfaceReadySignal = new YSignal<Boolean>();
+	
+	//====================================================
+	// メンバの宣言
+	//====================================================
+	
+	/** タッチイベントを受ける外部リスナー */
+	protected TouchListener	touchListener = null;
+	
+	
 	/** サーフェースの実サイズ */
 	int	surfaceWidth, surfaceHeight;
 	
@@ -46,9 +68,13 @@ public class GLFieldView extends GLSurfaceView {
 	/** レンダリングリスト */
 	protected YRendererList	renderList = null;
 	
-	/** サーフェースが作成されたシグナル */
-	public final YSignal<Boolean>	surfaceReadySignal = new YSignal<Boolean>();
+	/** 登録要求のテクスチャ */
+	protected ArrayList<TextureEntry>	textureEntry = new ArrayList<TextureEntry>();
 	
+	
+	//====================================================
+	// 外部公開メソッドの宣言
+	//====================================================
 	
 	public GLFieldView( Context context, AttributeSet attr ) {
 		
@@ -71,9 +97,17 @@ public class GLFieldView extends GLSurfaceView {
 	//	setFocusable( true );
 	}
 	
-	/** 登録要求のテクスチャ */
-	ArrayList<TextureEntry>	textureEntry = new ArrayList<TextureEntry>();
 	
+	/**************************************************************
+	 * 
+	 * タッチイベント取得リスナーを張る
+	 * 
+	 * @param listener
+	 */
+	public void setTouchListener( TouchListener listener ) {
+		
+		this.touchListener = listener;
+	}
 	
 	/**************************************************************
 	 * 
@@ -90,6 +124,25 @@ public class GLFieldView extends GLSurfaceView {
 			textureEntry.addAll( tex );
 		}
 	}
+	
+	
+	/****************************************************
+	 * 
+	 * ダブルバッファの切り替え
+	 * 
+	 * @param root
+	 */
+	public void invokeDraw( YRendererList list ) {
+		
+		this.renderList= list;
+		requestRender();
+	}
+	
+	
+	
+	//====================================================
+	// 内部メソッドの宣言
+	//====================================================
 	
 	/*************************************************************
 	 * 
@@ -196,18 +249,20 @@ public class GLFieldView extends GLSurfaceView {
 	};
 	
 	
-	/****************************************************
+	/*************************************************
 	 * 
-	 * ダブルバッファの切り替え
+	 * タッチイベント
 	 * 
-	 * @param root
 	 */
-	public void invokeDraw( YRendererList list ) {
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
 		
-		this.renderList= list;
-		requestRender();
+		// リスナーに転送
+		if( touchListener!=null )
+			return touchListener.onTouchEvent( event );
+		
+		return false;
 	}
-	
 	
 	/****************************************************
 	 * 
@@ -217,6 +272,7 @@ public class GLFieldView extends GLSurfaceView {
 	@Override
 	public void surfaceCreated(SurfaceHolder holder) {
 		super.surfaceCreated(holder);
+		// ログ出力
 		Log.v("App","GL:surfaceCreated");
 	}
 	
@@ -233,7 +289,7 @@ public class GLFieldView extends GLSurfaceView {
 		
 		// テクスチャを削除
 		graphics.deleteAllTexture();
-		
+		// ログ出力
 		Log.v("App","GL:surfaceDestroy");
 	}
 }

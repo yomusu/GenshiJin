@@ -5,6 +5,8 @@ import java.util.Arrays;
 
 import jp.yom.blocker.BlockStage;
 import jp.yom.yglib.GameActivity;
+import jp.yom.yglib.MotionEventCache;
+import jp.yom.yglib.MotionEventCache.Event;
 import jp.yom.yglib.ScenarioInterruptException;
 import jp.yom.yglib.StopWatch;
 import jp.yom.yglib.TimeOutException;
@@ -32,6 +34,10 @@ public class GensiJin extends GameActivity {
 	Ball	ball;
 	
 	DecimalFormat	cpuPowerFormat = new DecimalFormat("000.0%");
+	
+	/** モーションイベントキャッシュ */
+	MotionEventCache	motionEventCache = new MotionEventCache();
+	
 	
 	/*************************************************************
 	 * 
@@ -110,19 +116,30 @@ public class GensiJin extends GameActivity {
 		// 一定時間の間ループ
 		int	nokoriTime = 10*1000;
 		
+		// 入力開始
+		view.setTouchListener( motionEventCache );
+		
 		try {
 			while( nokoriTime >= 0 ) {
 
 				YRendererList	rendererList = new YRendererList();
-
-
+				
+				
 				// 1フレームの動き
 				// 当たり判定
 				stage.process( null, this, rendererList );
 
 				// 描画
 				invokeDraw( rendererList );
-
+				
+				// タッチイベント取得
+				{
+					Event e = motionEventCache.popFirst();
+					while( e!=null ) {
+						e = motionEventCache.popFirst();
+					}
+				}
+				
 				//------------------------
 				// 次フレームまで待つ
 				nextFrame();
@@ -137,7 +154,8 @@ public class GensiJin extends GameActivity {
 		} catch( ScenarioInterruptException e ) {
 
 		}
-
+		
+		view.setTouchListener( null );
 		
 		
 		
