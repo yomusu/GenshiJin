@@ -91,7 +91,7 @@ public class BlockerBall extends YNode implements YRenderer {
 		line.p0.set( line.p1 );
 		
 		// 速度
-		speed.set( 4, 0, 2 );
+		speed.set( 0, 0, 6 );
 	}
 	
 	
@@ -125,8 +125,6 @@ public class BlockerBall extends YNode implements YRenderer {
 	@Override
 	public void render(YGraphics g) {
 		
-		g.depthTest( true );
-		g.lighting( true );
 		g.cullFace( true );
 		
 		
@@ -144,9 +142,7 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		g.gl.glPopMatrix();
 		
-		g.depthTest( false );
 		g.cullFace( false );
-		g.lighting( false );
 	}
 	
 	

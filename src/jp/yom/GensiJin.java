@@ -113,7 +113,7 @@ public class GensiJin extends GameActivity {
 		
 		
 		// 一定時間の間ループ
-		int	nokoriTime = 20*1000;
+		int	nokoriTime = 60*1000;
 		
 		// 入力開始
 		view.setTouchListener( slideWatcher );

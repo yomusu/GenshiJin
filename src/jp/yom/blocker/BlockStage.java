@@ -1,8 +1,6 @@
 package jp.yom.blocker;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -15,11 +13,12 @@ import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
-import jp.yom.yglib.vector.FLine;
+import jp.yom.yglib.vector.AtariChecker;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
+import jp.yom.yglib.vector.AtariChecker.AtariIterator;
 
 
 /******************************************************
@@ -114,7 +113,7 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		//------------------------------
 		// カメラの初期設定
-		cameraRender.campos.set( 0, 400, -400 );
+		cameraRender.campos.set( 0, 400, -200 );
 		cameraRender.objpos.set( 0, 0, 0 );
 		cameraRender.camdir.set( 0, 1, 0 );
 		cameraRender.fovy = 60f;
@@ -161,28 +160,34 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		//------------------------
 		// 当たり判定
-		SurfaceIterator	it = new SurfaceIterator( floor.surfaces );
+		AtariChecker	atari = new AtariChecker();
+		
+		atari.addAll( floor.surfaces );
+		atari.addAll( bar.surfaces );
+		
+		// サーフェースリスト走査とあたった時の挙動
+		AtariIterator	it = atari.iterator( ball.line, 10 );
 		while( it.hasNext() ) {
-			
-			if( it.nextAtari(ball.line,10) ) {
-				
+
+			if( it.nextAtari() ) {
+
 				// 続いて残りの移動距離を反射させる
 				FVector	nokori = new FVector( it.cp, ball.line.p1 ).reflection( it.s.normal );
-				
+
 				// ボールの位置を交点に
 				ball.line.p1.set(it.cp).add( nokori );
-				
+
 				ball.line.p0.set(it.cp);
-				
+
 				// 速度ベクトルを反射
 				ball.speed.reflection( it.s.normal );
-				
+
 				// イテレーションしなおし
 				if( nokori.getScalar() > 1f )
-					it = new SurfaceIterator( floor.surfaces );
+					it = atari.iterator( ball.line, 10 );
 			}
 		}
-		
+
 		ball.process( parent, app, renderList );
 		
 		//------------------------
@@ -199,8 +204,10 @@ public class BlockStage extends YNode implements YRenderer {
 	@Override
 	public void render(YGraphics g) {
 		
-		// カメラのレンダラをセット
-		cameraRender.render(g);
+		//---------------------
+		// 初期化
+		g.initializeFor3D( cameraRender );
+		
 		
 		// 背景のレンダラをセット
 		//renderList.add( 10000, bgRender );
@@ -212,20 +219,16 @@ public class BlockStage extends YNode implements YRenderer {
 		//---------------------
 		// ブロック
 		
-		g.depthTest( true );
-		g.lighting( true );
+		g.cullFace( true );
 		
 		floor.model.render( g );
 		
-		g.cullFace( true );
 		
 		// モデル
 		for( Block block : blockList )
 			block.model.render(g);
 		
-		g.depthTest( false );
 		g.cullFace( false );
-		g.lighting( false );
 	}
 }
 
@@ -305,13 +308,13 @@ class Floor {
 		
 		// 底面の４点
 		FPoint	ptb[] = new FPoint[] {
-				new FPoint(hw,0,hd), new FPoint(-hw,0,hd),
-				new FPoint(hw,0,-hd), new FPoint(-hw,0,-hd)
+				new FPoint(-hw,0,hd), new FPoint(hw,0,hd),
+				new FPoint(-hw,0,-hd), new FPoint(hw,0,-hd)
 		};
 		// 底面を壁の高さまであげた4点
 		FPoint	ptc[] = new FPoint[] {
-				new FPoint(hw,h,hd), new FPoint(-hw,h,hd),
-				new FPoint(hw,h,-hd), new FPoint(-hw,h,-hd)
+				new FPoint(-hw,h,hd), new FPoint(hw,h,hd),
+				new FPoint(-hw,h,-hd), new FPoint(hw,h,-hd)
 		};
 		
 		
@@ -343,51 +346,6 @@ class Floor {
 		mate.setShinness( 0f );
 		
 		model.material = mate;
-	}
-}
-
-/****************************************
- * 
- * 当たり判定のための面イテレータ
- * 
- * @author Yomusu
- *
- */
-class SurfaceIterator {
-	
-	Iterator<FSurface>	it;
-	
-	public FSurface	s;
-	public FPoint		cp;
-	
-	
-	public SurfaceIterator( FSurface[] a ) {
-		this.it = Arrays.asList( a ).iterator();
-	}
-	
-	public boolean hasNext() {
-		return it.hasNext();
-	}
-	
-	/** 次の面を当たり判定します */
-	public boolean nextAtari( FLine ballLine, float thickness ) {
-		
-		s = it.next();
-		
-		// 背面ではなかったら
-		if( s.isBack( ballLine.toVector() )==false ) {
-			
-			// 交点計算を行う
-			cp = s.getCrossPoint( ballLine, thickness );
-			
-			if( cp!=null )
-				return true;
-			
-		} else {
-			cp = null;
-		}
-		
-		return false;
 	}
 }
 
