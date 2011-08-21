@@ -52,8 +52,6 @@ public class Camera implements YRenderer {
 	public void render(YGraphics g) {
 		
 		g.gl.glMatrixMode( GL10.GL_PROJECTION );
-		g.gl.glLoadIdentity();
-		
 		
 		// 透視変換…Zの向きが逆というウワサあり
 		GLU.gluPerspective( g.gl, fovy, 4f/3f, near, far );
@@ -66,6 +64,5 @@ public class Camera implements YRenderer {
 		);
 		
 		g.gl.glMatrixMode( GL10.GL_MODELVIEW );
-		
 	}
 }

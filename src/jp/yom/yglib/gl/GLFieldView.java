@@ -171,29 +171,6 @@ public class GLFieldView extends GLSurfaceView {
 			}
 			
 			//----------------------------------
-			// 描画準備
-	        gl.glDisable(GL10.GL_DITHER);
-			gl.glDisable( GL10.GL_TEXTURE_2D );
-			gl.glDisable( GL10.GL_BLEND );
-
-			gl.glHint( GL10.GL_PERSPECTIVE_CORRECTION_HINT, GL10.GL_FASTEST );
-			gl.glShadeModel(GL10.GL_SMOOTH);
-			gl.glDisable(GL10.GL_DEPTH_TEST);
-			gl.glDisable(GL10.GL_LIGHTING );
-			
-			// 透視変換の設定
-			gl.glMatrixMode( GL10.GL_PROJECTION );
-			gl.glLoadIdentity();
-			gl.glOrthof( -screenWidth/2f,screenWidth/2f, -screenHeight/2f,screenHeight/2f, -100f,100f );
-			
-			gl.glMatrixMode( GL10.GL_MODELVIEW );
-			gl.glLoadIdentity();
-
-			// 画面のクリア
-			gl.glClearColor( 0.3f, 0.3f, 0.3f, 1.0f );
-			gl.glClear(GL10.GL_COLOR_BUFFER_BIT | GL10.GL_DEPTH_BUFFER_BIT);
-
-			//----------------------------------
 			// Rootノードの描画
 			if( renderList!=null ) {
 				graphics.gl = gl;
