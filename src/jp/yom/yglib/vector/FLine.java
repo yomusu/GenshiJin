@@ -283,14 +283,52 @@ public class FLine {
 		
 		StringBuilder	buf = new StringBuilder();
 		
-		buf.append( p0 ).append("-").append(p1);
+		buf.append(p0).append("-").append(p1);
 		
 		return buf.toString();
 	}
 	
 	
 	
-	
+	/***************************************************
+	 * 
+	 * ２本の線分が最接近する点をFLineにて返します
+	 * 
+	 * line1の点→line2の点
+	 * 
+	 * @param line1
+	 * @param line2
+	 * 
+	 * @return
+	 */
+	static public FLine getAdjacentPoint( FLine line1, FLine line2 ) {
+		
+		FVector	v1 = new FVector( line1.nvector );
+		FVector	v2 = new FVector( line2.nvector );
+		
+		FPoint	p1 = new FPoint( line1.p0 );
+		FPoint	p2 = new FPoint( line2.p0 );
+		
+		FVector	p1p2 = new FVector( p1, p2 );
+		
+		float	d1 = p1p2.getDot( v1 );
+		float	d2 = p1p2.getDot( v2 );
+		float	dv = v1.getDot(v2);
+		
+		// 本当は距離だけでも出したい
+		if( dv==1.0f || dv==-1.0f )
+			return null;
+		
+		float	t1 = ( d1 - d2 * dv ) / ( 1.0f - dv * dv );
+		float	t2 = ( d2 - d1 * dv ) / ( dv * dv - 1.0f );
+		
+		FPoint	q1 = p1.add( v1.scale(t1) );
+		FPoint	q2 = p2.add( v2.scale(t2) );
+		
+		return new FLine(q1,q2);
+	}
+
+
 	/***************************************************************
 	 * 
 	 * テスト
@@ -384,8 +422,11 @@ public class FLine {
 		System.out.println("線分外:順方向");
 		kabeLine.getDistance( new FPoint(10,1001) );
 		
-		
-		sphere_labo();
+		System.out.println( "== 直線同士の最短距離 ==" );
+		FLine	l0 = new FLine( new FPoint(-5,5,1), new FPoint(5,5,1) );
+		FLine	l1 = new FLine( new FPoint(3,0,-5), new FPoint(-3,0,5) );
+		System.out.println( getAdjacentPoint( l0, l1 ) );
+
 	}
 	
 	static public void sphere_labo() {
@@ -423,4 +464,6 @@ public class FLine {
 		System.out.println( "直角2="+a.getDot( new FVector(-10,10,0) ) );
 		System.out.println( "やや直角より逆="+a.getDot( new FVector(10,-11,0) ) );
 	}
+	
+	
 }

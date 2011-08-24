@@ -75,9 +75,22 @@ public class AtariChecker {
 
 			// 背面ではなかったら
 			if( s.isBack( line.toVector() )==false ) {
-
-				// 交点計算を行う
-				cp = s.getCrossPoint( line, r );
+				
+				// 半径で外側に押し出す
+				FSurface	ss = new FSurface( s ).push( r );
+				
+				// 押し出した面との交点計算を行う
+				cp = ss.getCrossPoint( line );
+				
+				// 辺との当たり判定を行う
+				if( cp!=null ) {
+					
+				}
+				
+				// 点との当たり判定を行う
+				if( cp!=null ) {
+					
+				}
 
 				if( cp!=null )
 					return true;
@@ -87,6 +100,21 @@ public class AtariChecker {
 			}
 
 			return false;
+		}
+		
+		private FPoint getCrossPoint( FLine line, FLine hen, float r ) {
+			
+			// 最接近する点、距離を出す
+			FLine	c = FLine.getAdjacentPoint( line, hen );
+			
+			if( c!=null ) {
+				// 距離が半径以内なら、当たり
+				// 辺側の点から球を描き、lineとの交点を求める
+				// lineとの交点のうち、起点(line.p0)に最も近いのが交点
+				return line.getCrossPointForSphere( c.p1, r );
+			}
+			
+			return null;
 		}
 	}
 }
