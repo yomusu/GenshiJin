@@ -322,6 +322,12 @@ public class FLine {
 		float	t1 = ( d1 - d2 * dv ) / ( 1.0f - dv * dv );
 		float	t2 = ( d2 - d1 * dv ) / ( dv * dv - 1.0f );
 		
+		t1 = Math.max( t1, 0f );
+		t1 = Math.min( t1, line1.length );
+		
+		t2 = Math.max( t2, 0f );
+		t2 = Math.min( t2, line2.length );
+		
 		FPoint	q1 = p1.add( v1.scale(t1) );
 		FPoint	q2 = p2.add( v2.scale(t2) );
 		
@@ -423,10 +429,13 @@ public class FLine {
 		kabeLine.getDistance( new FPoint(10,1001) );
 		
 		System.out.println( "== 直線同士の最短距離 ==" );
-		FLine	l0 = new FLine( new FPoint(-5,5,1), new FPoint(5,5,1) );
-		FLine	l1 = new FLine( new FPoint(3,0,-5), new FPoint(-3,0,5) );
+		FLine	l0 = new FLine( new FPoint(-30,20,-100), new FPoint(30,20,-100) );
+		FLine	l1 = new FLine( new FPoint(-35,5,0), new FPoint(-35,5,-105) );
 		System.out.println( getAdjacentPoint( l0, l1 ) );
-
+		System.out.println( "== 無限線?の最短距離 ==" );
+		FLine	l10 = new FLine( new FPoint(-30,20,-100), new FPoint(0,20,-100) );
+		FLine	l11 = new FLine( new FPoint(35,5,0), new FPoint(35,5,-105) );
+		System.out.println( getAdjacentPoint( l10, l11 ) );
 	}
 	
 	static public void sphere_labo() {

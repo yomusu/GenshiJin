@@ -163,6 +163,7 @@ public class BlockStage extends YNode implements YRenderer {
 		AtariChecker	atari = new AtariChecker();
 		
 		atari.addAll( floor.surfaces );
+		atari.addAll( blockList.get(0).surfaces );
 		atari.addAll( bar.surfaces );
 		
 		// サーフェースリスト走査とあたった時の挙動
@@ -172,7 +173,7 @@ public class BlockStage extends YNode implements YRenderer {
 			if( it.nextAtari() ) {
 
 				// 続いて残りの移動距離を反射させる
-				FVector	nokori = new FVector( it.cp, ball.line.p1 ).reflection( it.s.normal );
+				FVector	nokori = new FVector( it.cp, ball.line.p1 ).reflection( it.reflection );
 
 				// ボールの位置を交点に
 				ball.line.p1.set(it.cp).add( nokori );
@@ -180,7 +181,7 @@ public class BlockStage extends YNode implements YRenderer {
 				ball.line.p0.set(it.cp);
 
 				// 速度ベクトルを反射
-				ball.speed.reflection( it.s.normal );
+				ball.speed.reflection( it.reflection );
 
 				// イテレーションしなおし
 				if( nokori.getScalar() > 1f )

@@ -51,12 +51,17 @@ public class AtariChecker {
 		float	r;
 		FLine	line;
 		
+		/** 当たり対象の面 */
 		public FSurface	s;
+		/** 交点 */
 		public FPoint	cp;
-
+		/** 当たった反射ベクトル */
+		public FVector	reflection;
+		
+		
 		protected AtariIterator( FLine line, float r ) {
 			this.r = r;
-			this.line = line;
+			this.line = new FLine( line );
 			this.it = list.iterator();
 		}
 
@@ -74,47 +79,72 @@ public class AtariChecker {
 			s = it.next();
 
 			// 背面ではなかったら
-			if( s.isBack( line.toVector() )==false ) {
-				
-				// 半径で外側に押し出す
-				FSurface	ss = new FSurface( s ).push( r );
-				
-				// 押し出した面との交点計算を行う
-				cp = ss.getCrossPoint( line );
-				
-				// 辺との当たり判定を行う
-				if( cp!=null ) {
-					
-				}
-				
-				// 点との当たり判定を行う
-				if( cp!=null ) {
-					
-				}
-
-				if( cp!=null )
-					return true;
-
-			} else {
+			if( s.isBack( line.toVector() ) ) {
 				cp = null;
+				return false;
 			}
+
+			// 半径で外側に押し出した面との交点計算を行う
+			{
+				FSurface	ss = new FSurface( s ).push( r );
+				cp = ss.getCrossPoint( line );
+				if( cp!=null ) {
+					this.reflection = s.normal;
+					return true;
+				}
+			}
+			
+			// 辺(角含む)との当たり判定を行う
+			if( atariLine( new FLine( s.p0, s.p1 ) ) )
+				return true;
+			if( atariLine( new FLine( s.p1, s.p3 ) ) )
+				return true;
+			if( atariLine( new FLine( s.p3, s.p2 ) ) )
+				return true;
+			if( atariLine( new FLine( s.p2, s.p0 ) ) )
+				return true;
 
 			return false;
 		}
 		
-		private FPoint getCrossPoint( FLine line, FLine hen, float r ) {
+		private boolean atariLine( FLine hen ) {
 			
 			// 最接近する点、距離を出す
 			FLine	c = FLine.getAdjacentPoint( line, hen );
 			
-			if( c!=null ) {
-				// 距離が半径以内なら、当たり
+			// 距離が半径以内なら、当たり
+			if( c!=null && c.length <= r ) {
 				// 辺側の点から球を描き、lineとの交点を求める
 				// lineとの交点のうち、起点(line.p0)に最も近いのが交点
-				return line.getCrossPointForSphere( c.p1, r );
+				FPoint	p = line.getCrossPointForSphere( c.p1, r );
+				if( p!=null ) {
+					
+					// 交点をセット
+					this.cp = p;
+					// 反射ベクトルをセット
+					this.reflection = new FVector( c.p1, p ).normalize();
+					
+					return true;
+				}
 			}
 			
-			return null;
+			return false;
+		}
+		
+		private boolean atariPoint( FPoint point ) {
+			
+			FPoint	p = line.getCrossPointForSphere( point, r );
+			if( p!=null ) {
+
+				// 交点をセット
+				this.cp = p;
+				// 反射ベクトルをセット
+				this.reflection = new FVector( p, point ).normalize();
+
+				return true;
+			}
+
+			return false;
 		}
 	}
 }

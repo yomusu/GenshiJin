@@ -191,12 +191,18 @@ public class FVector {
 		
 		//--------------------------------
 		// 反射のテスト
-		FVector	ref = new FVector(0,-2,0).normalize();
-		
-		System.out.println( "反射1="+ new FVector(2,2,0).reflection( ref ) );
-		System.out.println( "反射2="+ new FVector(2,1,0).reflection( ref ) );
-		System.out.println( "反射3="+ new FVector(2,-2,0).reflection( ref ) );
+		{
+			FVector	ref = new FVector(0,-2,0).normalize();
 
+			System.out.println( "反射1="+ new FVector(2,2,0).reflection( ref ) );
+			System.out.println( "反射2="+ new FVector(2,1,0).reflection( ref ) );
+			System.out.println( "反射3="+ new FVector(2,-2,0).reflection( ref ) );
+		}
+		{
+			FVector	ref = new FVector(0.32f, 0f, 0.95f).normalize();
+
+			System.out.println( "反射101="+ new FVector(0,0,6).reflection( ref ) );
+		}
 	}
 }
 

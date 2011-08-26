@@ -63,9 +63,9 @@ public class RacketBar  extends YNode implements YRenderer {
 				// 背面
 				new FSurface(ptc[1],ptc[0],ptb[1],ptb[0]),
 				// 向かって右側面
-		//		new FSurface(ptc[3],ptc[1],ptb[3],ptb[1]),
+				new FSurface(ptc[3],ptc[1],ptb[3],ptb[1]),
 				// 向かって左側面
-		//		new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
+				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
 		};
 
 		//------------------------------
@@ -87,7 +87,7 @@ public class RacketBar  extends YNode implements YRenderer {
 		// 座標
 		FMatrix	mat = new FMatrix();
 		mat.unit();
-		mat.translate( 0, 0, -100 );
+		mat.translate( 0, 0, -150 );
 		
 		for( FSurface s : surfaces )
 			s.transform( mat );

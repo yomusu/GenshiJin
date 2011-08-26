@@ -87,11 +87,12 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		
 		// 座標
-		line.p1.set( 10, 5, 0 );
+		line.p1.set( -0, 5, -50 );
 		line.p0.set( line.p1 );
+		line.refresh();
 		
 		// 速度
-		speed.set( 0, 0, 6 );
+		speed.set( 0, 0, -6 );
 	}
 	
 	
@@ -103,8 +104,8 @@ public class BlockerBall extends YNode implements YRenderer {
 	public void forward() {
 		
 		line.p0.set( line.p1 );
-		
 		line.p1.add( speed );
+		line.refresh();
 	}
 	
 	
