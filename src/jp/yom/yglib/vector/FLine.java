@@ -28,8 +28,8 @@ public class FLine {
 	
 	
 	public FLine( FPoint p0, FPoint p1 ) {
-		this.p0 = p0;
-		this.p1 = p1;
+		this.p0 = new FPoint(p0);
+		this.p1 = new FPoint(p1);
 		
 		refresh();
 	}

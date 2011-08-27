@@ -7,6 +7,7 @@ import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
+import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
@@ -27,6 +28,8 @@ public class RacketBar  extends YNode implements YRenderer {
 	
 	/** 当たり面(World座標) */
 	FSurface[]	surfaces;
+	/** 当たり辺(World座標) */
+	FLine[]		lines;
 
 	/** モデル */
 	Model	model;
@@ -54,10 +57,6 @@ public class RacketBar  extends YNode implements YRenderer {
 		};
 		
 		surfaces = new FSurface[] {
-				// 底面
-		//		new FSurface(ptb[1],ptb[0],ptb[3],ptb[2]),
-				// 天井
-		//		new FSurface(ptc[0],ptc[1],ptc[2],ptc[3]),
 				// 前面
 				new FSurface(ptc[2],ptc[3],ptb[2],ptb[3]),
 				// 背面
@@ -66,6 +65,13 @@ public class RacketBar  extends YNode implements YRenderer {
 				new FSurface(ptc[3],ptc[1],ptb[3],ptb[1]),
 				// 向かって左側面
 				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
+		};
+		
+		lines = new FLine[] {
+				new FLine( ptc[0], ptb[0] ),
+				new FLine( ptc[1], ptb[1] ),
+				new FLine( ptc[2], ptb[2] ),
+				new FLine( ptc[3], ptb[3] ),
 		};
 
 		//------------------------------
@@ -91,6 +97,8 @@ public class RacketBar  extends YNode implements YRenderer {
 		
 		for( FSurface s : surfaces )
 			s.transform( mat );
+		for( FLine l : lines )
+			l.transform( mat );
 		
 		Log.v("App","nom="+surfaces[0].normal );
 	}
@@ -109,6 +117,9 @@ public class RacketBar  extends YNode implements YRenderer {
 		
 		for( FSurface s : surfaces )
 			s.transform( mat );
+		
+		for( FLine l : lines )
+			l.transform( mat );
 		
 	//	Log.v( "App", "pos="+line.p1+" slide="+slide );
 	}

@@ -7,7 +7,6 @@ import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
-import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
@@ -32,10 +31,11 @@ public class BlockerBall extends YNode implements YRenderer {
 	Model	model;
 	
 	/** ボールの座標(p0が元、p1が現在) */
-	public FLine	line = new FLine( new FPoint(), new FPoint() );
+	final public FPoint	p0 = new FPoint();
+	final public FPoint	p1 = new FPoint();
 	
 	/** 速度 */
-	public FVector	speed = new FVector(0,0,0);
+	final public FVector	speed = new FVector(0,0,0);
 	
 
 	public BlockerBall( ) {
@@ -87,9 +87,8 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		
 		// 座標
-		line.p1.set( -0, 5, -50 );
-		line.p0.set( line.p1 );
-		line.refresh();
+		p1.set( -0, 5, -50 );
+		p0.set( p1 );
 		
 		// 速度
 		speed.set( 0, 0, -6 );
@@ -102,10 +101,8 @@ public class BlockerBall extends YNode implements YRenderer {
 	 * 
 	 */
 	public void forward() {
-		
-		line.p0.set( line.p1 );
-		line.p1.add( speed );
-		line.refresh();
+		p0.set( p1 );
+		p1.add( speed );
 	}
 	
 	
@@ -131,7 +128,7 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		FMatrix	mat = new FMatrix();
 		mat.unit();
-		mat.translate( line.p1.x, line.p1.y, line.p1.z );
+		mat.translate( p1.x, p1.y, p1.z );
 		
 		g.gl.glPushMatrix();
 		

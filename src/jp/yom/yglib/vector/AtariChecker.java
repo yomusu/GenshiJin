@@ -7,7 +7,9 @@ import java.util.Iterator;
 
 /*******************************************
  * 
- * 面と線の当たり判定を行う
+ * 
+ * 移動する球体と
+ * 面や線の当たり判定を行う
  * 
  * また、当たった時の結果を格納する
  * 
@@ -16,8 +18,10 @@ import java.util.Iterator;
  */
 public class AtariChecker {
 	
-	
-	ArrayList<FSurface>	list = new ArrayList<FSurface>();
+	/** 面リスト */
+	ArrayList<FSurface>	surfaceList = new ArrayList<FSurface>();
+	/** 直線リスト */
+	ArrayList<FLine>	lineList = new ArrayList<FLine>();
 	
 	
 	/********************************************
@@ -27,7 +31,17 @@ public class AtariChecker {
 	 * @param s
 	 */
 	public void addAll( FSurface[] s ) {
-		list.addAll( Arrays.asList(s) );
+		surfaceList.addAll( Arrays.asList(s) );
+	}
+	
+	/********************************************
+	 * 
+	 * チェックするサーフェースを追加する
+	 * 
+	 * @param s
+	 */
+	public void addAll( FLine[] s ) {
+		lineList.addAll( Arrays.asList(s) );
 	}
 	
 	
@@ -36,115 +50,114 @@ public class AtariChecker {
 	 * イテレータを取得する
 	 * 
 	 */
-	public AtariIterator iterator( FLine line, float r ) {
+	public AtariResult iterator( FPoint p0, FPoint p1, final float r ) {
 		
-		return new AtariIterator( line, r );
+		final FLine	line = new FLine( p0, p1 );
+		
+		//------------------------------
+		// 面の当たり判定
+		{
+			Iterator<FSurface>	it = surfaceList.iterator();
+			while( it.hasNext() ) {
+
+				FSurface	s = it.next();
+
+				// 背面ではなかったら
+				if( s.isBack( line.toVector() ) == false ) {
+
+					// 半径で外側に押し出した面との交点計算を行う
+					FSurface	ss = new FSurface( s ).push( r );
+					FPoint	cp = ss.getCrossPoint( line );
+					if( cp!=null ) {
+
+						AtariResult	result = new AtariResult();
+
+						result.cp = cp;
+						result.reflection = s.normal;
+
+						return result;
+					}
+
+				}
+			}
+		}
+		
+		//------------------------------
+		// 線の当たり判定
+		{
+			FLine	lr = null;
+			FLine	atari = null;
+			
+			Iterator<FLine>	it = lineList.iterator();
+			while( it.hasNext() ) {
+				
+				FLine	hen = it.next();
+				
+				FLine	c = FLine.getAdjacentPoint( line, hen );
+				if( c!=null && c.length <= r ) {
+					
+					if( lr==null ) {
+						
+						lr = c;
+						
+					} else {
+						
+						// ボールの移動元に最も近いものが当たり
+						float	olddis = new FVector(line.p0,c.p0).getScalar();
+						float	newdis = new FVector(line.p0,lr.p0).getScalar();
+						if(  olddis > newdis ) {
+							lr = c;
+							atari = hen;
+						}
+					}
+				}
+				
+			}
+			
+			// 距離が半径以内なら、当たり
+			if( lr!=null ) {
+				
+				// 辺側の点から球を描き、lineとの交点を求める
+				// lineとの交点のうち、起点(line.p0)に最も近いのが交点
+				FPoint	p = line.getCrossPointForSphere( lr.p1, r );
+				if( p!=null ) {
+					
+					AtariResult	result = new AtariResult();
+
+					// 交点をセット
+					result.cp = p;
+					// 反射ベクトルをセット
+					result.reflection = new FVector( lr.p1, p ).normalize();
+					
+					result.atariLine = atari;
+					result.atariLineResult = lr;
+
+					return result;
+				}
+			}
+
+		}
+		
+		return null;
 	}
 	
 	
 	
 	
-	public class AtariIterator {
+	public class AtariResult {
 		
-		private Iterator<FSurface>	it;
-		
-		float	r;
-		FLine	line;
-		
-		/** 当たり対象の面 */
-		public FSurface	s;
 		/** 交点 */
 		public FPoint	cp;
+		
 		/** 当たった反射ベクトル */
 		public FVector	reflection;
 		
 		
-		protected AtariIterator( FLine line, float r ) {
-			this.r = r;
-			this.line = new FLine( line );
-			this.it = list.iterator();
-		}
-
-		public boolean hasNext() {
-			return it.hasNext();
-		}
-
-		/********************************************
-		 * 
-		 * 次の面を当たり判定します
-		 * 
-		 */
-		public boolean nextAtari() {
-
-			s = it.next();
-
-			// 背面ではなかったら
-			if( s.isBack( line.toVector() ) ) {
-				cp = null;
-				return false;
-			}
-
-			// 半径で外側に押し出した面との交点計算を行う
-			{
-				FSurface	ss = new FSurface( s ).push( r );
-				cp = ss.getCrossPoint( line );
-				if( cp!=null ) {
-					this.reflection = s.normal;
-					return true;
-				}
-			}
-			
-			// 辺(角含む)との当たり判定を行う
-			if( atariLine( new FLine( s.p0, s.p1 ) ) )
-				return true;
-			if( atariLine( new FLine( s.p1, s.p3 ) ) )
-				return true;
-			if( atariLine( new FLine( s.p3, s.p2 ) ) )
-				return true;
-			if( atariLine( new FLine( s.p2, s.p0 ) ) )
-				return true;
-
-			return false;
-		}
+		/** 辺に当たった場合、その線が入る */
+		public FLine	atariLine = null;
 		
-		private boolean atariLine( FLine hen ) {
-			
-			// 最接近する点、距離を出す
-			FLine	c = FLine.getAdjacentPoint( line, hen );
-			
-			// 距離が半径以内なら、当たり
-			if( c!=null && c.length <= r ) {
-				// 辺側の点から球を描き、lineとの交点を求める
-				// lineとの交点のうち、起点(line.p0)に最も近いのが交点
-				FPoint	p = line.getCrossPointForSphere( c.p1, r );
-				if( p!=null ) {
-					
-					// 交点をセット
-					this.cp = p;
-					// 反射ベクトルをセット
-					this.reflection = new FVector( c.p1, p ).normalize();
-					
-					return true;
-				}
-			}
-			
-			return false;
-		}
+		/** 辺に当たった場合、その当たり結果が入る */
+		public FLine	atariLineResult = null;
 		
-		private boolean atariPoint( FPoint point ) {
-			
-			FPoint	p = line.getCrossPointForSphere( point, r );
-			if( p!=null ) {
-
-				// 交点をセット
-				this.cp = p;
-				// 反射ベクトルをセット
-				this.reflection = new FVector( p, point ).normalize();
-
-				return true;
-			}
-
-			return false;
-		}
 	}
 }

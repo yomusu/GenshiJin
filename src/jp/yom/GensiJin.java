@@ -36,6 +36,9 @@ public class GensiJin extends GameActivity {
 	/** モーションイベントキャッシュ */
 	SlideWatcher	slideWatcher = new SlideWatcher();
 	
+	/** ボール情報 */
+	String	ballInfo = "";
+	
 	
 	/*************************************************************
 	 * 
@@ -52,8 +55,14 @@ public class GensiJin extends GameActivity {
 //		buf.append("ball-speed= ").append(ball.speed).append("\n");
 		
 		// ウオッチポイント情報を更新する
+		
+		// CPU
 		String	s = cpuPowerFormat.format( (double)cpuPowerRatio );
 		((TextView)findViewById(R.id.watchCPUValue)).setText( s );
+		
+		// Ball
+		if( ballInfo!=null )
+			((TextView)findViewById(R.id.watchBallValue)).setText( ballInfo );
 	}
 	
 	
@@ -132,6 +141,12 @@ public class GensiJin extends GameActivity {
 				
 				// ステージ
 				stage.process( null, this, rendererList );
+				
+				// ボール情報
+				StringBuilder	buf = new StringBuilder();
+				buf.append("pos=").append( stage.ball.p0.toString() );
+				buf.append(" speed=").append( stage.ball.speed );
+				ballInfo = buf.toString();
 				
 				// 描画
 				invokeDraw( rendererList );

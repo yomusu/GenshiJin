@@ -14,11 +14,13 @@ import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.AtariChecker;
+import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
-import jp.yom.yglib.vector.AtariChecker.AtariIterator;
+import jp.yom.yglib.vector.AtariChecker.AtariResult;
+import android.util.Log;
 
 
 /******************************************************
@@ -67,7 +69,7 @@ public class BlockStage extends YNode implements YRenderer {
 	Floor		floor = new Floor();
 	
 	/** ボール */
-	BlockerBall	ball = null;
+	public BlockerBall	ball = null;
 	
 	/** バー */
 	public RacketBar		bar = null;
@@ -164,29 +166,49 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		atari.addAll( floor.surfaces );
 		atari.addAll( blockList.get(0).surfaces );
+		atari.addAll( blockList.get(0).lines );
 		atari.addAll( bar.surfaces );
+		atari.addAll( bar.lines );
+		
 		
 		// サーフェースリスト走査とあたった時の挙動
-		AtariIterator	it = atari.iterator( ball.line, 10 );
-		while( it.hasNext() ) {
+		AtariResult	it = atari.iterator( ball.p0, ball.p1, 10 );
+		
+		if( it!=null ) {
 
-			if( it.nextAtari() ) {
-
-				// 続いて残りの移動距離を反射させる
-				FVector	nokori = new FVector( it.cp, ball.line.p1 ).reflection( it.reflection );
-
-				// ボールの位置を交点に
-				ball.line.p1.set(it.cp).add( nokori );
-
-				ball.line.p0.set(it.cp);
-
-				// 速度ベクトルを反射
-				ball.speed.reflection( it.reflection );
-
-				// イテレーションしなおし
-				if( nokori.getScalar() > 1f )
-					it = atari.iterator( ball.line, 10 );
+			// ログ
+			{
+				StringBuilder	buf = new StringBuilder("before:");
+				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
+				buf.append(" speed=").append(ball.speed);
+				Log.v("atari", buf.toString() );
 			}
+
+			// 続いて残りの移動距離を反射させる
+			FVector	nokori = new FVector( it.cp, ball.p1 ).reflection( it.reflection );
+
+			// ボールの位置を交点に
+			ball.p1.set(it.cp).add( nokori );
+			ball.p0.set(it.cp);
+
+			// 速度ベクトルを反射
+			ball.speed.reflection( it.reflection );
+
+			// ログ
+			Log.v("atari", "atariLine="+it.atariLine );
+			Log.v("atari", "atariResult="+it.atariLineResult );
+			Log.v("atari", "cp="+it.cp );
+			{
+				StringBuilder	buf = new StringBuilder("after:");
+				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
+				buf.append(" speed=").append(ball.speed);
+				buf.append(" ref=").append(it.reflection);
+				Log.v("atari", buf.toString() );
+			}
+
+			// イテレーションしなおし
+			if( nokori.getScalar() > 1f )
+				it = atari.iterator( ball.p0, ball.p1, 10 );
 		}
 
 		ball.process( parent, app, renderList );
@@ -362,6 +384,8 @@ class Block {
 	
 	/** 当たり面(World座標) */
 	FSurface[]	surfaces;
+	/** 当たり辺(World座標) */
+	FLine[]		lines;
 	
 	/** モデル */
 	Model	model;
@@ -406,6 +430,12 @@ class Block {
 				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
 		};
 		
+		lines = new FLine[] {
+				new FLine( ptc[0], ptb[0] ),
+				new FLine( ptc[1], ptb[1] ),
+				new FLine( ptc[2], ptb[2] ),
+				new FLine( ptc[3], ptb[3] ),
+		};
 		
 		//------------------------------
 		// モデルの作成
@@ -436,5 +466,7 @@ class Block {
 		for( FSurface s : surfaces )
 			s.transform( mat );
 		
+		for( FLine l : lines )
+			l.transform( mat );
 	}
 }
