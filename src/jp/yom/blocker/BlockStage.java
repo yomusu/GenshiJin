@@ -174,7 +174,7 @@ public class BlockStage extends YNode implements YRenderer {
 		// サーフェースリスト走査とあたった時の挙動
 		AtariResult	it = atari.iterator( ball.p0, ball.p1, 10 );
 		
-		if( it!=null ) {
+		while( it!=null ) {
 
 			// ログ
 			{
@@ -209,6 +209,8 @@ public class BlockStage extends YNode implements YRenderer {
 			// イテレーションしなおし
 			if( nokori.getScalar() > 1f )
 				it = atari.iterator( ball.p0, ball.p1, 10 );
+			else
+				it = null;
 		}
 
 		ball.process( parent, app, renderList );
