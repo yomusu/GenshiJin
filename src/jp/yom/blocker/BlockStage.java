@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
+import jp.yom.yglib.AtariModel;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Camera;
 import jp.yom.yglib.gl.Light;
@@ -99,7 +100,7 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		
 		Block	block = new Block();
-		block.transform( mat );
+		block.atari.transform( mat );
 		
 		blockList.add( block );
 		
@@ -130,6 +131,7 @@ public class BlockStage extends YNode implements YRenderer {
 		bar = new RacketBar();
 	}
 	
+	AtariModel	beforeHitModel = null;
 	
 	/**********************************************************
 	 * 
@@ -150,7 +152,7 @@ public class BlockStage extends YNode implements YRenderer {
 		mat.unit();
 		mat.rotateY( radZ );
 		
-		blockList.get(0).transform( mat );
+		blockList.get(0).atari.transform( mat );
 		
 		renderList.add( 100, this );
 		
@@ -163,21 +165,20 @@ public class BlockStage extends YNode implements YRenderer {
 		//------------------------
 		// 当たり判定
 		AtariChecker	atari = new AtariChecker();
+		atari.setCancelModel( beforeHitModel );
 		
-		atari.addAll( floor.surfaces );
-		atari.addAll( blockList.get(0).surfaces );
-		atari.addAll( blockList.get(0).lines );
-		atari.addAll( bar.surfaces );
-		atari.addAll( bar.lines );
+		atari.addAll( floor.atari );
+		atari.add( blockList.get(0).atari );
+		atari.add( bar.atari );
 		
 		
 		// サーフェースリスト走査とあたった時の挙動
-		AtariResult	it = atari.iterator( ball.p0, ball.p1, 10 );
-		
+		AtariResult	it = atari.doAtari( ball.p0, ball.p1, 10 );
 		while( it!=null ) {
 
 			// ログ
 			{
+				Log.v("atari", "-- atari ----" );
 				StringBuilder	buf = new StringBuilder("before:");
 				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
 				buf.append(" speed=").append(ball.speed);
@@ -195,7 +196,9 @@ public class BlockStage extends YNode implements YRenderer {
 			ball.speed.reflection( it.reflection );
 
 			// ログ
-			Log.v("atari", "atariLine="+it.atariLine );
+			Log.v("atari", "Model="+it.model );
+			Log.v("atari", "Surface="+it.surface );
+			Log.v("atari", "Line="+it.atariLine );
 			Log.v("atari", "atariResult="+it.atariLineResult );
 			Log.v("atari", "cp="+it.cp );
 			{
@@ -205,11 +208,14 @@ public class BlockStage extends YNode implements YRenderer {
 				buf.append(" ref=").append(it.reflection);
 				Log.v("atari", buf.toString() );
 			}
+			
+			beforeHitModel = it.model;
+			atari.setCancelModel( beforeHitModel );
 
 			// イテレーションしなおし
-			if( nokori.getScalar() > 1f )
-				it = atari.iterator( ball.p0, ball.p1, 10 );
-			else
+			if( nokori.getScalar() > 1f ) {
+				it = atari.doAtari( ball.p0, ball.p1, 10 );
+			} else
 				it = null;
 		}
 
@@ -312,7 +318,12 @@ class BackGroundRender implements YRenderer {
 class Floor {
 	
 	/** 当たり面(World座標) */
-	FSurface[]	surfaces;
+	AtariModel[]	atari = new AtariModel[] {
+			new AtariModel(),
+			new AtariModel(),
+			new AtariModel(),
+			new AtariModel(),
+	};
 	
 	/** モデル */
 	Model	model;
@@ -341,12 +352,10 @@ class Floor {
 				new FPoint(-hw,h,hd), new FPoint(hw,h,hd),
 				new FPoint(-hw,h,-hd), new FPoint(hw,h,-hd)
 		};
-		
-		
-		surfaces = new FSurface[] {
+
+		FSurface[]	surfaces = new FSurface[] {
 				// 床
-			//	new FSurface(ptb[0],ptb[1],ptb[2],ptb[3]),
-				
+				//	new FSurface(ptb[0],ptb[1],ptb[2],ptb[3]),
 				// 壁：手前
 				new FSurface(ptc[3],ptc[2],ptb[3],ptb[2]),
 				// 壁：奥
@@ -356,6 +365,14 @@ class Floor {
 				// 壁：向かって左側面
 				new FSurface(ptc[2],ptc[0],ptb[2],ptb[0]),
 		};
+
+		atari[0].surfaces = new FSurface[] { surfaces[0] };
+		// 壁：奥
+		atari[1].surfaces = new FSurface[] { surfaces[1] };
+		// 壁：向かって右側面
+		atari[2].surfaces = new FSurface[] { surfaces[2] };
+		// 壁：向かって左側面
+		atari[3].surfaces = new FSurface[] { surfaces[3] };
 		
 		
 		//------------------------------
@@ -383,11 +400,7 @@ class Floor {
  */
 class Block {
 	
-	
-	/** 当たり面(World座標) */
-	FSurface[]	surfaces;
-	/** 当たり辺(World座標) */
-	FLine[]		lines;
+	AtariModel	atari = new AtariModel();
 	
 	/** モデル */
 	Model	model;
@@ -417,7 +430,7 @@ class Block {
 				new FPoint(-hw,h,-hd), new FPoint(hw,h,-hd)
 		};
 		
-		surfaces = new FSurface[] {
+		atari.surfaces = new FSurface[] {
 				// 底面
 				new FSurface(ptb[1],ptb[0],ptb[3],ptb[2]),
 				// 天井
@@ -432,7 +445,7 @@ class Block {
 				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
 		};
 		
-		lines = new FLine[] {
+		atari.lines = new FLine[] {
 				new FLine( ptc[0], ptb[0] ),
 				new FLine( ptc[1], ptb[1] ),
 				new FLine( ptc[2], ptb[2] ),
@@ -441,7 +454,7 @@ class Block {
 		
 		//------------------------------
 		// モデルの作成
-		model = new Model(surfaces);
+		model = new Model(atari.surfaces);
 		
 		// マテリアルの設定
 		Material	mate = new Material();
@@ -455,20 +468,4 @@ class Block {
 		model.material = mate;
 	}
 	
-	
-	/*************************************************
-	 * 
-	 * このブロックにアフィン変換を適用する
-	 * 
-	 * @param mat
-	 */
-	public void transform( FMatrix mat ) {
-		
-		// すべての面に対して…
-		for( FSurface s : surfaces )
-			s.transform( mat );
-		
-		for( FLine l : lines )
-			l.transform( mat );
-	}
 }

@@ -1,5 +1,6 @@
 package jp.yom.blocker;
 
+import jp.yom.yglib.AtariModel;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Material;
 import jp.yom.yglib.gl.Model;
@@ -12,7 +13,6 @@ import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
-import android.util.Log;
 
 
 /**************************************************************
@@ -26,11 +26,9 @@ import android.util.Log;
  */
 public class RacketBar  extends YNode implements YRenderer {
 	
-	/** 当たり面(World座標) */
-	FSurface[]	surfaces;
-	/** 当たり辺(World座標) */
-	FLine[]		lines;
-
+	/** 当たり判定Model */
+	AtariModel	atari = new AtariModel();;
+	
 	/** モデル */
 	Model	model;
 	
@@ -56,7 +54,7 @@ public class RacketBar  extends YNode implements YRenderer {
 				new FPoint(-hw,h,-hd), new FPoint(hw,h,-hd)
 		};
 		
-		surfaces = new FSurface[] {
+		atari.surfaces = new FSurface[] {
 				// 前面
 				new FSurface(ptc[2],ptc[3],ptb[2],ptb[3]),
 				// 背面
@@ -67,7 +65,7 @@ public class RacketBar  extends YNode implements YRenderer {
 				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
 		};
 		
-		lines = new FLine[] {
+		atari.lines = new FLine[] {
 				new FLine( ptc[0], ptb[0] ),
 				new FLine( ptc[1], ptb[1] ),
 				new FLine( ptc[2], ptb[2] ),
@@ -76,7 +74,7 @@ public class RacketBar  extends YNode implements YRenderer {
 
 		//------------------------------
 		// モデルの作成
-		model = new Model(surfaces);
+		model = new Model(atari.surfaces);
 
 		// マテリアルの設定
 		Material	mate = new Material();
@@ -95,12 +93,7 @@ public class RacketBar  extends YNode implements YRenderer {
 		mat.unit();
 		mat.translate( 0, 0, -150 );
 		
-		for( FSurface s : surfaces )
-			s.transform( mat );
-		for( FLine l : lines )
-			l.transform( mat );
-		
-		Log.v("App","nom="+surfaces[0].normal );
+		atari.transform( mat );
 	}
 	
 	/******************************************
@@ -115,11 +108,7 @@ public class RacketBar  extends YNode implements YRenderer {
 		mat.translate( slide.x*-1, 0, 0 );
 		// x座標の向きが異なるのを補正
 		
-		for( FSurface s : surfaces )
-			s.transform( mat );
-		
-		for( FLine l : lines )
-			l.transform( mat );
+		atari.transform( mat );
 		
 	//	Log.v( "App", "pos="+line.p1+" slide="+slide );
 	}
