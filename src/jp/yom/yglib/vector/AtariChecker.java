@@ -73,7 +73,7 @@ public class AtariChecker {
 								AtariResult	result = new AtariResult();
 
 								result.cp = cp;
-								result.reflection = s.normal;
+								result.normal = s.normal;
 								
 								result.model = model;
 								result.surface = s;
@@ -137,8 +137,8 @@ public class AtariChecker {
 
 					// 交点をセット
 					result.cp = p;
-					// 反射ベクトルをセット
-					result.reflection = new FVector( lr.p1, p ).normalize();
+					// 反射ベクトルをセット(辺の点→軌跡上の点)
+					result.normal = new FVector( lr.p1, p ).normalize();
 					
 					result.model = hitModel;
 					result.atariLine = hitLine;
@@ -164,8 +164,8 @@ public class AtariChecker {
 		/** 交点 */
 		public FPoint	cp;
 		
-		/** 当たった反射ベクトル */
-		public FVector	reflection;
+		/** 当たった面もしくは辺の法線ベクトル */
+		public FVector	normal;
 		
 		
 		/** 面が当たったらそのSurface */
@@ -177,5 +177,62 @@ public class AtariChecker {
 		/** 辺に当たった場合、その当たり結果が入る */
 		public FLine	atariLineResult = null;
 		
+		
+		
+		/********************************************
+		 * 
+		 * 運動エネルギーを与えられた時の影響を計算する
+		 * 
+		 * @param dst
+		 */
+		public FVector calcAction( FVector _action ) {
+			
+			// 法線方向に掛かる力を算出
+			float	s = _action.getDot( normal );
+			FVector	force = new FVector(normal).scale( s );
+			
+			// 相手の速度（自身の衝撃吸収度合いを乗算）
+		//	FVector	dstSpeed = new FVector( action ).scale( 1.0f );
+			
+			FVector	mySpeed = (model.speed!=null) ? model.speed : new FVector(0,0,0);
+			
+			// 自身の速度
+			FVector	affect = new FVector(mySpeed).add( force );
+			
+			// 反作用
+			FVector	reaction = new FVector(mySpeed).add( new FVector(force).invert() );
+			
+			// 自身は動かないため
+			reaction.add( affect.invert() );
+			
+			return new FVector(_action).add( reaction );
+		}
+		
+		
+	}
+	
+	static public void main( String[] args ) {
+		
+		FVector	normal = new FVector( 0.67f, 0, 0.75f );
+		FVector	speed = new FVector( 3.89f, 0, 4.56f );
+		
+		
+		float	s = speed.getDot( normal );
+		
+		FVector	action = new FVector(normal).scale( s );
+		
+		
+		FVector	r = new FVector(action).invert().scale(2.0f).add( speed );
+		
+		System.out.println( r );
+	}
+	
+	public static class ActionResult {
+		
+		/** 自身に対する作用 */
+		public FVector	affect;
+		
+		/** 反作用 */
+		public FVector	reaction;
 	}
 }

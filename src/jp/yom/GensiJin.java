@@ -116,7 +116,7 @@ public class GensiJin extends GameActivity {
 		// ブロック崩し編
 		
 		// ステージ
-		BlockStage	stage = new BlockStage();
+		BlockStage	stage = new BlockStage(slideWatcher);
 		// ブロックデータ初期化
 		stage.initialize();
 		
@@ -134,10 +134,6 @@ public class GensiJin extends GameActivity {
 				
 				
 				// 1フレームの動き
-				
-				// スライドタッチイベント取得
-				FVector	slide = slideWatcher.popLastSlide();
-				stage.bar.move( slide );
 				
 				// ステージ
 				stage.process( null, this, rendererList );

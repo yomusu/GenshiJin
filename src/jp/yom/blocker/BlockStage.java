@@ -6,6 +6,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import jp.yom.yglib.AtariModel;
 import jp.yom.yglib.GameActivity;
+import jp.yom.yglib.SlideWatcher;
 import jp.yom.yglib.gl.Camera;
 import jp.yom.yglib.gl.Light;
 import jp.yom.yglib.gl.Material;
@@ -75,6 +76,14 @@ public class BlockStage extends YNode implements YRenderer {
 	/** バー */
 	public RacketBar		bar = null;
 	
+	public SlideWatcher		slideWatcher = null;
+	
+	
+	
+	public BlockStage( SlideWatcher slide ) {
+		
+		this.slideWatcher = slide;
+	}
 	
 	/**********************************************************
 	 * 
@@ -157,22 +166,30 @@ public class BlockStage extends YNode implements YRenderer {
 		renderList.add( 100, this );
 		
 		
-		
+		//------------------------
+		// バーの移動
+
+		// スライドタッチイベント取得→移動量に変換
+		FVector	slide = slideWatcher.popLastSlide();
+		slide.set( slide.x*-1, 0, 0 );
+
+		// バー移動
+		bar.move( slide );
+
+
 		//------------------------
 		// ボール進行
 		ball.forward();
-		
+
 		//------------------------
 		// 当たり判定
 		AtariChecker	atari = new AtariChecker();
 		atari.setCancelModel( beforeHitModel );
-		
+
 		atari.addAll( floor.atari );
 		atari.add( blockList.get(0).atari );
 		atari.add( bar.atari );
-		
-		
-		// サーフェースリスト走査とあたった時の挙動
+
 		AtariResult	it = atari.doAtari( ball.p0, ball.p1, 10 );
 		while( it!=null ) {
 
@@ -185,15 +202,16 @@ public class BlockStage extends YNode implements YRenderer {
 				Log.v("atari", buf.toString() );
 			}
 
+			// 速度ベクトルを反射
+			ball.speed.set( it.calcAction( ball.speed ) );
+
 			// 続いて残りの移動距離を反射させる
-			FVector	nokori = new FVector( it.cp, ball.p1 ).reflection( it.reflection );
+			float	nokoriLength = new FVector( it.cp, ball.p1 ).getScalar();
+			FVector	vnokori = new FVector( ball.speed ).normalize().scale( nokoriLength );
 
 			// ボールの位置を交点に
-			ball.p1.set(it.cp).add( nokori );
+			ball.p1.set(it.cp).add( vnokori );
 			ball.p0.set(it.cp);
-
-			// 速度ベクトルを反射
-			ball.speed.reflection( it.reflection );
 
 			// ログ
 			Log.v("atari", "Model="+it.model );
@@ -205,24 +223,24 @@ public class BlockStage extends YNode implements YRenderer {
 				StringBuilder	buf = new StringBuilder("after:");
 				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
 				buf.append(" speed=").append(ball.speed);
-				buf.append(" ref=").append(it.reflection);
+				buf.append(" ref=").append(it.normal);
 				Log.v("atari", buf.toString() );
 			}
-			
+
 			beforeHitModel = it.model;
 			atari.setCancelModel( beforeHitModel );
 
 			// イテレーションしなおし
-			if( nokori.getScalar() > 1f ) {
+			if( nokoriLength > 1f ) {
 				it = atari.doAtari( ball.p0, ball.p1, 10 );
 			} else
 				it = null;
 		}
-
-		ball.process( parent, app, renderList );
 		
-		//------------------------
-		// バー
+		
+		//-------------------------------
+		// レンダリングリストに登録
+		ball.process( parent, app, renderList );
 		bar.process( parent, app, renderList );
 	}
 	

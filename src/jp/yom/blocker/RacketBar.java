@@ -98,14 +98,14 @@ public class RacketBar  extends YNode implements YRenderer {
 	
 	/******************************************
 	 * 
-	 * ボールを進める
+	 * バーを進める
 	 * 
 	 */
 	public void move( FVector slide ) {
 		
 		FMatrix	mat = new FMatrix();
 		mat.unit();
-		mat.translate( slide.x*-1, 0, 0 );
+		mat.translate( slide.x, slide.y, slide.z );
 		// x座標の向きが異なるのを補正
 		
 		atari.transform( mat );

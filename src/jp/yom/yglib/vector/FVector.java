@@ -62,6 +62,23 @@ public class FVector {
 		return this;
 	}
 	
+	
+	/*****************************************
+	 * 
+	 * 自身に相手の内容をセットする
+	 * 
+	 * @param v
+	 * @return
+	 */
+	public FVector set( FVector v ) {
+		
+		this.x = v.x;
+		this.y = v.y;
+		this.z = v.z;
+		return this;
+		
+	}
+	
 	/****************************************
 	 * 
 	 * ベクトル同士の足し算
