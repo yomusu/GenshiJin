@@ -3,8 +3,10 @@ package jp.yom.yglib.vector;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
-import jp.yom.yglib.AtariModel;
+import android.util.Log;
+
 
 
 /*******************************************
@@ -20,9 +22,9 @@ import jp.yom.yglib.AtariModel;
  */
 public class AtariChecker {
 	
-	ArrayList<AtariModel>	modelList = new ArrayList<AtariModel>();
+	ArrayList<AtariObject>	objectList = new ArrayList<AtariObject>();
 	
-	AtariModel	cancelModel = null;
+	AtariObject	cancelModel = null;
 	
 	
 	/********************************************
@@ -31,135 +33,230 @@ public class AtariChecker {
 	 * 
 	 * @param s
 	 */
-	public void addAll( AtariModel[] atari ) {
-		modelList.addAll( Arrays.asList(atari) );
+	public void addAll( AtariObject[] atari ) {
+		objectList.addAll( Arrays.asList(atari) );
 	}
-	public void add( AtariModel atari ) {
-		modelList.add( atari );
+	public void add( AtariObject atari ) {
+		objectList.add( atari );
 	}
 	
 	
-	public void setCancelModel( AtariModel model ) {
+	public void setCancelModel( AtariObject model ) {
 		cancelModel = model;
 	}
 	
+	
+	
 	/********************************************
 	 * 
+	 * 指定されたオブジェクトをセットされているスピードで
+	 * 前進させ、当たり判定を行います
 	 * 
-	 * 球体の動線によって当たり判定を行う
-	 * 
+	 * @param obj
 	 */
-	public AtariResult doAtari( FPoint p0, FPoint p1, final float r ) {
+	public void forwardAndCheck( AtariObject obj ) {
 		
-		final FLine	line = new FLine( p0, p1 );
-		
-		//------------------------------
-		// 面の当たり判定
-		{
-			Iterator<AtariModel>	it = modelList.iterator();
-			while( it.hasNext() ) {
-
-				AtariModel	model = it.next();
-				if( model.surfaces!=null && model!=cancelModel ) {
-					for( FSurface s : model.surfaces ) {
-						// 背面ではなかったら
-						if( s.isBack( line.toVector() ) == false ) {
-
-							// 半径で外側に押し出した面との交点計算を行う
-							FSurface	ss = new FSurface( s ).push( r );
-							FPoint	cp = ss.getCrossPoint( line );
-							if( cp!=null ) {
-
-								AtariResult	result = new AtariResult();
-
-								result.cp = cp;
-								result.normal = s.normal;
-								
-								result.model = model;
-								result.surface = s;
-
-								return result;
-							}
-
-						}
-					}
-				}
-			}
+		if( obj instanceof AtariBall ) {
+			ballForwardAndCheck( (AtariBall)obj );
 		}
 		
-		//------------------------------
-		// 線の当たり判定
-		{
-			FLine	lr = null;
-			FLine	hitLine = null;
-			AtariModel	hitModel = null;
-			
-			Iterator<AtariModel>	it = modelList.iterator();
-			while( it.hasNext() ) {
-				
-				AtariModel	model = it.next();
-				if( model.lines!=null && model!=cancelModel ) {
-					for( FLine hen : model.lines ) {
-						FLine	c = FLine.getAdjacentPoint( line, hen );
-						if( c!=null && c.length <= r ) {
-
-							if( lr==null ) {
-
-								lr = c;
-								hitLine = hen;
-								hitModel = model;
-
-							} else {
-
-								// ボールの移動元に最も近いものが当たり
-								float	olddis = new FVector(line.p0,c.p0).getScalar();
-								float	newdis = new FVector(line.p0,lr.p0).getScalar();
-								if(  olddis > newdis ) {
-									lr = c;
-									hitLine = hen;
-									hitModel = model;
-								}
-							}
-						}
-					}
-				}
-			}
-			
-			// 距離が半径以内なら、当たり
-			if( lr!=null ) {
-				
-				// 辺側の点から球を描き、lineとの交点を求める
-				// lineとの交点のうち、起点(line.p0)に最も近いのが交点
-				FPoint	p = line.getCrossPointForSphere( lr.p1, r );
-				if( p!=null ) {
-					
-					AtariResult	result = new AtariResult();
-
-					// 交点をセット
-					result.cp = p;
-					// 反射ベクトルをセット(辺の点→軌跡上の点)
-					result.normal = new FVector( lr.p1, p ).normalize();
-					
-					result.model = hitModel;
-					result.atariLine = hitLine;
-					result.atariLineResult = lr;
-
-					return result;
-				}
-			}
-
+		if( obj instanceof AtariModel ) {
+			modelForwardAndCheck( (AtariModel)obj );
 		}
 		
-		return null;
 	}
 	
+	private void modelForwardAndCheck( AtariModel obj ) {
+		
+		// ボールを探す
+		AtariBall	ball = null;
+		{
+			Iterator<AtariObject>	it = objectList.iterator();
+			while( it.hasNext() ) {
+				AtariObject	o = it.next();
+				if( o instanceof AtariBall ) {
+					ball = (AtariBall)o;
+					break;
+				}
+			}
+		}
+		
+		// Modelから見たボールの移動
+		FPoint	ballPos = new FPoint(ball.pos);
+		ballPos.add( new FVector( obj.speed ).invert() );
+		
+		// 当たり判定
+		Nearizer	nearizer = new Nearizer( ball.pos, ballPos, ball.r );
+		nearizer.vite( obj );
+		
+		AtariResult	atari = nearizer.getResult();
+		if( atari!=null ) {
+
+			// ボールの速度ベクトルを反射
+			ball.speed.set( atari.calcAction( ball.speed ) );
+			
+			// ボールの位置をModelとの交点にする
+			ball.p0.set( ball.pos );
+			ball.pos.set( atari.cp ).add( obj.speed );
+		}
+		
+		// Modelの位置を進める
+		obj.forward();
+	}
+	
+	private void ballForwardAndCheck( AtariBall obj ) {
+		
+		// オブジェクトを前進させる
+		obj.p0.set( obj.pos );
+		obj.pos.add( obj.speed );
+		
+		
+		// 当たり判定
+		Nearizer	nearizer = new Nearizer( obj.p0, obj.pos, obj.r );
+		
+		while( nearizer!=null ) {
+			
+			// 対象となるオブジェクトすべてと当たり判定を行う
+			Iterator<AtariObject>	it = objectList.iterator();
+			while( it.hasNext() )
+				nearizer.vite( it.next() );
+
+			// 当たり結果を取得する
+			AtariResult	atari = nearizer.getResult();
+			if( atari!=null ) {
+
+				// ログ
+				Log.v("atari", "-- atari ----" );
+				Log.v("atari", "before: "+obj.toString() );
+
+				// 速度ベクトルを反射
+				obj.speed.set( atari.calcAction( obj.speed ) );
+
+				// 続いて残りの移動距離を反射させる
+				float	nokoriLength = new FVector( atari.cp, obj.pos ).getScalar();
+				FVector	vnokori = new FVector( obj.speed ).normalize().scale( nokoriLength );
+
+				// ボールの位置を交点に
+				obj.pos.set(atari.cp).add( vnokori );
+				obj.p0.set(atari.cp);
+
+				// ログ
+				Log.v("atari", atari.toString() );
+				Log.v("atari", "after:"+obj.toString() );
+
+				cancelModel = atari.atariobj;
+
+				// イテレーションしなおし
+				if( nokoriLength > 1f ) {
+					nearizer = new Nearizer( obj.p0, obj.pos, obj.r );
+					continue;
+				}
+			}
+			
+			nearizer = null;
+		}
+	}
+	
+	class Nearizer {
+		
+		final float	r ;
+		final FLine	kiseki;
+		final FVector	vkiseki;
+		
+		AtariResult	result = null;
+		
+		
+		public Nearizer(  FPoint p0, FPoint p1, final float r ) {
+			
+			this.kiseki = new FLine( p0, p1 );
+			this.vkiseki = kiseki.toVector();
+			this.r = r;
+		}
+		
+		public void vite( AtariObject obj ) {
+			
+			// 面の処理
+			if( obj.surfaces!=null && obj!=cancelModel ) {
+				
+				for( FSurface s : obj.surfaces ) {
+					
+					// 背面ではなかったら
+					if( s.isBack( vkiseki ) == false ) {
+
+						// 半径で外側に押し出した面との交点計算を行う
+						FPoint	cp = new FSurface( s ).push( r ).getCrossPoint( kiseki );
+						if( cp!=null ) {
+							
+							// 新しい交点の方がボールの移動元に近ければ差し替え
+							float	newdis = new FVector(kiseki.p0,cp).getScalar();
+							if( result==null || newdis < result.distance ) {
+
+								AtariResult	r = new AtariResult();
+
+								r.cp = cp;
+								r.normal = s.normal;
+								r.distance = newdis;
+
+								r.atariobj = obj;
+								r.surface = s;
+
+								result = r;
+							}
+						}
+					}
+				}
+			}
+			
+			// 線の処理
+			if( obj.lines!=null && obj!=cancelModel ) {
+				
+				for( FLine hen : obj.lines ) {
+					
+					FLine	c = FLine.getAdjacentPoint( kiseki, hen );
+					if( c!=null && c.length <= r ) {
+						
+						// 辺側の点から球を描き、lineとの交点を求める
+						// lineとの交点のうち、起点(line.p0)に最も近いのが交点
+						FPoint	p = kiseki.getCrossPointForSphere( c.p1, r );
+						if( p!=null ) {
+							
+							// 新しい交点の方がボールの移動元に近ければ差し替え
+							float	newdis = new FVector(kiseki.p0,p).getScalar();
+							if( result==null || newdis < result.distance ) {
+								
+								AtariResult	r = new AtariResult();
+
+								// 交点をセット
+								r.cp = p;
+								// 反射ベクトルをセット(辺の点→軌跡上の点)
+								r.normal = new FVector( c.p1, p ).normalize();
+								r.distance = newdis;
+
+								r.atariobj = obj;
+								r.line = hen;
+								r.atariLineResult = c;
+								
+								result = r;
+							}
+						}
+					}
+				}
+			}
+			
+		}
+		
+		public AtariResult getResult() {
+			
+			return result;
+		}
+	}
 	
 	
 	
 	public class AtariResult {
 		
-		/** 当たったModel */
-		public AtariModel	model;
+		/** 当たったAtariObjct */
+		public AtariObject	atariobj;
 		
 		/** 交点 */
 		public FPoint	cp;
@@ -167,16 +264,34 @@ public class AtariChecker {
 		/** 当たった面もしくは辺の法線ベクトル */
 		public FVector	normal;
 		
+		/** 交点までの距離(小さいほど近い) */
+		public float	distance;
+		
 		
 		/** 面が当たったらそのSurface */
 		public FSurface		surface;
 		
 		/** 辺に当たった場合、その線が入る */
-		public FLine	atariLine = null;
+		public FLine	line = null;
 		
 		/** 辺に当たった場合、その当たり結果が入る */
 		public FLine	atariLineResult = null;
 		
+		
+		public String toString() {
+			
+			StringBuilder	buf = new StringBuilder();
+			
+			buf.append( " cp=").append( cp ).append("\n");
+			buf.append( " normal=" ).append(normal).append("\n");
+			buf.append( " distance=" ).append(normal).append("\n");
+			buf.append( " Model=").append( atariobj ).append("\n");
+			buf.append( " Surface=").append( surface ).append("\n");
+			buf.append( " Line=").append( line ).append("\n");
+			buf.append( " atariResult=").append( atariLineResult );
+			
+			return buf.toString();
+		}
 		
 		
 		/********************************************
@@ -194,7 +309,7 @@ public class AtariChecker {
 			// 相手の速度（自身の衝撃吸収度合いを乗算）
 		//	FVector	dstSpeed = new FVector( action ).scale( 1.0f );
 			
-			FVector	mySpeed = (model.speed!=null) ? model.speed : new FVector(0,0,0);
+			FVector	mySpeed = (atariobj.speed!=null) ? atariobj.speed : new FVector(0,0,0);
 			
 			// 自身の速度
 			FVector	affect = new FVector(mySpeed).add( force );

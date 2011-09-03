@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import jp.yom.yglib.AtariModel;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.SlideWatcher;
 import jp.yom.yglib.gl.Camera;
@@ -16,13 +15,12 @@ import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.AtariChecker;
+import jp.yom.yglib.vector.AtariModel;
 import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
-import jp.yom.yglib.vector.AtariChecker.AtariResult;
-import android.util.Log;
 
 
 /******************************************************
@@ -138,9 +136,16 @@ public class BlockStage extends YNode implements YRenderer {
 		//------------------------------
 		// バー
 		bar = new RacketBar();
+		
+		//------------------------------
+		// 当たり判定
+		atari.addAll( floor.atari );
+		atari.add( blockList.get(0).atari );
+		atari.add( bar.atari );
+		atari.add( ball );
 	}
 	
-	AtariModel	beforeHitModel = null;
+	AtariChecker	atari = new AtariChecker();
 	
 	/**********************************************************
 	 * 
@@ -173,75 +178,21 @@ public class BlockStage extends YNode implements YRenderer {
 		FVector	slide = slideWatcher.popLastSlide();
 		slide.set( slide.x*-1, 0, 0 );
 
+
+		//------------------------
+		// ボール進行 & 当たり判定
+		atari.forwardAndCheck( ball );
+
+		//-------------------------------
 		// バー移動
-		bar.move( slide );
+		bar.atari.speed.set( slide );
+		atari.forwardAndCheck( bar.atari );
 
 
-		//------------------------
-		// ボール進行
-		ball.forward();
-
-		//------------------------
-		// 当たり判定
-		AtariChecker	atari = new AtariChecker();
-		atari.setCancelModel( beforeHitModel );
-
-		atari.addAll( floor.atari );
-		atari.add( blockList.get(0).atari );
-		atari.add( bar.atari );
-
-		AtariResult	it = atari.doAtari( ball.p0, ball.p1, 10 );
-		while( it!=null ) {
-
-			// ログ
-			{
-				Log.v("atari", "-- atari ----" );
-				StringBuilder	buf = new StringBuilder("before:");
-				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
-				buf.append(" speed=").append(ball.speed);
-				Log.v("atari", buf.toString() );
-			}
-
-			// 速度ベクトルを反射
-			ball.speed.set( it.calcAction( ball.speed ) );
-
-			// 続いて残りの移動距離を反射させる
-			float	nokoriLength = new FVector( it.cp, ball.p1 ).getScalar();
-			FVector	vnokori = new FVector( ball.speed ).normalize().scale( nokoriLength );
-
-			// ボールの位置を交点に
-			ball.p1.set(it.cp).add( vnokori );
-			ball.p0.set(it.cp);
-
-			// ログ
-			Log.v("atari", "Model="+it.model );
-			Log.v("atari", "Surface="+it.surface );
-			Log.v("atari", "Line="+it.atariLine );
-			Log.v("atari", "atariResult="+it.atariLineResult );
-			Log.v("atari", "cp="+it.cp );
-			{
-				StringBuilder	buf = new StringBuilder("after:");
-				buf.append(" ball=").append(ball.p0).append("-").append(ball.p1);
-				buf.append(" speed=").append(ball.speed);
-				buf.append(" ref=").append(it.normal);
-				Log.v("atari", buf.toString() );
-			}
-
-			beforeHitModel = it.model;
-			atari.setCancelModel( beforeHitModel );
-
-			// イテレーションしなおし
-			if( nokoriLength > 1f ) {
-				it = atari.doAtari( ball.p0, ball.p1, 10 );
-			} else
-				it = null;
-		}
-		
-		
 		//-------------------------------
 		// レンダリングリストに登録
-		ball.process( parent, app, renderList );
-		bar.process( parent, app, renderList );
+		renderList.add( 10, ball );
+		renderList.add( 10, bar );
 	}
 	
 	

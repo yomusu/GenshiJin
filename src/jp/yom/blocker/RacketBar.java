@@ -1,6 +1,5 @@
 package jp.yom.blocker;
 
-import jp.yom.yglib.AtariModel;
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Material;
 import jp.yom.yglib.gl.Model;
@@ -8,6 +7,8 @@ import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
+import jp.yom.yglib.vector.AtariModel;
+import jp.yom.yglib.vector.AtariObject;
 import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
@@ -27,7 +28,7 @@ import jp.yom.yglib.vector.FVector;
 public class RacketBar  extends YNode implements YRenderer {
 	
 	/** 当たり判定Model */
-	AtariModel	atari = new AtariModel();;
+	AtariModel	atari = new AtariModel();
 	
 	/** モデル */
 	Model	model;
@@ -95,24 +96,6 @@ public class RacketBar  extends YNode implements YRenderer {
 		
 		atari.transform( mat );
 	}
-	
-	/******************************************
-	 * 
-	 * バーを進める
-	 * 
-	 */
-	public void move( FVector slide ) {
-		
-		FMatrix	mat = new FMatrix();
-		mat.unit();
-		mat.translate( slide.x, slide.y, slide.z );
-		// x座標の向きが異なるのを補正
-		
-		atari.transform( mat );
-		
-	//	Log.v( "App", "pos="+line.p1+" slide="+slide );
-	}
-	
 	
 	/******************************************
 	 * 

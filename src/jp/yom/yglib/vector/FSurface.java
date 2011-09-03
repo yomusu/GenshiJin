@@ -159,7 +159,7 @@ public class FSurface {
 	 * 指定されたベクトルがバックフリップに引っかかるか判定します
 	 * バックフリップに引っかかるとは、ベクトルが法線ベクトルと同じ方向を向いていること
 	 * 
-	 * @param line
+	 * @param kiseki
 	 * @return	true	バック：法線と直線が同じ向き
 	 */
 	public boolean isBack( FVector v ) {

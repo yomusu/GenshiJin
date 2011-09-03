@@ -1,16 +1,13 @@
 package jp.yom.blocker;
 
-import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Material;
 import jp.yom.yglib.gl.Model;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
-import jp.yom.yglib.gl.YRendererList;
-import jp.yom.yglib.node.YNode;
+import jp.yom.yglib.vector.AtariBall;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
-import jp.yom.yglib.vector.FVector;
 
 
 
@@ -22,7 +19,7 @@ import jp.yom.yglib.vector.FVector;
  * @author Yomusu
  *
  */
-public class BlockerBall extends YNode implements YRenderer {
+public class BlockerBall extends AtariBall implements YRenderer {
 
 	/** 当たり面(World座標) */
 	FSurface[]	surfaces;
@@ -30,18 +27,11 @@ public class BlockerBall extends YNode implements YRenderer {
 	/** モデル */
 	Model	model;
 	
-	/** ボールの座標(p0が元、p1が現在) */
-	final public FPoint	p0 = new FPoint();
-	final public FPoint	p1 = new FPoint();
 	
-	/** 速度 */
-	final public FVector	speed = new FVector(0,0,0);
-	
-
 	public BlockerBall( ) {
-
+		
 		// 幅
-		int	r = 10;
+		r = 10;
 
 		// 底面の４点
 		FPoint	ptb[] = new FPoint[] {
@@ -87,37 +77,13 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		
 		// 座標
-		p1.set( -0, 5, -50 );
-		p0.set( p1 );
+		pos.set( -0, 5, -50 );
+		p0.set( pos );
 		
 		// 速度
 		speed.set( 0, 0, -6 );
 	}
 	
-	
-	/******************************************
-	 * 
-	 * ボールを進める
-	 * 
-	 */
-	public void forward() {
-		p0.set( p1 );
-		p1.add( speed );
-	}
-	
-	
-	/******************************************
-	 * 
-	 * 毎フレームの処理
-	 * 
-	 */
-	@Override
-	public void process(YNode parent, GameActivity app, YRendererList renderList) {
-		
-		super.process(parent, app, renderList);
-		
-		renderList.add( 10, this );
-	}
 	
 	
 	@Override
@@ -128,7 +94,7 @@ public class BlockerBall extends YNode implements YRenderer {
 		
 		FMatrix	mat = new FMatrix();
 		mat.unit();
-		mat.translate( p1.x, p1.y, p1.z );
+		mat.translate( pos.x, pos.y, pos.z );
 		
 		g.gl.glPushMatrix();
 		

@@ -1,9 +1,6 @@
-package jp.yom.yglib;
+package jp.yom.yglib.vector;
 
-import jp.yom.yglib.vector.FLine;
-import jp.yom.yglib.vector.FMatrix;
-import jp.yom.yglib.vector.FSurface;
-import jp.yom.yglib.vector.FVector;
+
 
 /********************************
  * 
@@ -17,11 +14,16 @@ import jp.yom.yglib.vector.FVector;
  * @author Yomusu
  *
  */
-public class AtariModel {
-	
+public class AtariObject {
 	
 	/** 自身の速度 */
-	public FVector	speed;
+	final public FVector	speed = new FVector(0,0,0);
+	
+	/** ボールの座標 */
+	final public FPoint	pos = new FPoint();
+	/** ひとつ前のボールの座標 */
+	final public FPoint	p0 = new FPoint();
+	
 	
 	/** 当たり面(World座標) */
 	public FSurface[]	surfaces;
@@ -56,13 +58,12 @@ public class AtariModel {
 	}
 	
 	
-	/********************************************
-	 * 
-	 * 力を加えられる
-	 * 
-	 */
-	public void affectAction( FVector action ) {
-		this.speed.add( action );
+	public String toString() {
+		
+		StringBuilder	buf = new StringBuilder();
+		buf.append("pos=").append(p0).append("(").append(pos).append(")");
+		buf.append(" speed=").append(speed);
+		
+		return buf.toString();
 	}
-	
 }
