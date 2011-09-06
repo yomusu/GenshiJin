@@ -1,6 +1,8 @@
 package jp.yom.blocker;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -16,11 +18,14 @@ import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.AtariChecker;
 import jp.yom.yglib.vector.AtariModel;
+import jp.yom.yglib.vector.AtariObject;
 import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
+import jp.yom.yglib.vector.AtariChecker.AtariCallback;
+import jp.yom.yglib.vector.AtariChecker.AtariResult;
 
 
 /******************************************************
@@ -51,7 +56,7 @@ import jp.yom.yglib.vector.FVector;
  * @author matsumoto
  *
  */
-public class BlockStage extends YNode implements YRenderer {
+public class BlockStage extends YNode implements YRenderer,AtariCallback {
 	
 	
 	/** ブロックのリスト */
@@ -74,8 +79,11 @@ public class BlockStage extends YNode implements YRenderer {
 	/** バー */
 	public RacketBar		bar = null;
 	
+	/** タッチのスライドを監視 */
 	public SlideWatcher		slideWatcher = null;
 	
+	/** 当たり判定 */
+	AtariChecker	atari = new AtariChecker();
 	
 	
 	public BlockStage( SlideWatcher slide ) {
@@ -93,24 +101,7 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		//------------------------------
 		// ブロックデータの読み込み
-		FMatrix	mat = new FMatrix();
-		
-		
-		// 試しに一個配置
-		
-		float	x = 0;
-		float	y = 0;
-		
-		
-		mat.unit();
-		mat.translate( x,y,0f );
-		
-		
-		Block	block = new Block();
-		block.atari.transform( mat );
-		
-		blockList.add( block );
-		
+		buildBlock();
 		
 		//------------------------------
 		// 光源の設定
@@ -139,13 +130,50 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		//------------------------------
 		// 当たり判定
-		atari.addAll( floor.atari );
-		atari.add( blockList.get(0).atari );
-		atari.add( bar.atari );
-		atari.add( ball );
+		atari.setCallback( this );
 	}
 	
-	AtariChecker	atari = new AtariChecker();
+	private void buildBlock() {
+		
+		String[]	datas = new String[]{
+				"0000 0000",
+				"00 000 00",
+				"000 0 000",
+		};
+		
+		FMatrix	mat = new FMatrix();
+		
+		int	blockWidth = 35;
+		int	blockDepth = 25;
+		
+		float	z = 50;
+		
+		for( String row : datas ) {
+			
+			// 左座標
+			float	x = (row.length()/2) * blockWidth;
+			
+			for( char c : row.toCharArray() ) {
+				
+				if( c == '0' ) {
+					
+					mat.unit();
+					mat.translate( x, 0, z );
+					
+					Block	block = new Block();
+					block.atari.transform( mat );
+					
+					blockList.add( block );
+				}
+				
+				x -= blockWidth;
+			}
+			
+			z += blockDepth;
+		}
+		
+	}
+	
 	
 	/**********************************************************
 	 * 
@@ -159,42 +187,64 @@ public class BlockStage extends YNode implements YRenderer {
 		super.process(parent, app, renderList);
 		
 		
-		// 試しに回転
-		float	radZ = (float)((3.14/180.0) * 1);
-		
-		FMatrix	mat = new FMatrix();
-		mat.unit();
-		mat.rotateY( radZ );
-		
-		blockList.get(0).atari.transform( mat );
-		
-		renderList.add( 100, this );
-		
-		
 		//------------------------
 		// バーの移動
 
 		// スライドタッチイベント取得→移動量に変換
 		FVector	slide = slideWatcher.popLastSlide();
 		slide.set( slide.x*-1, 0, 0 );
-
-
+		
+		//--------------------------------------
+		// 当たり判定に載せるリストを作成
+		ArrayList<AtariObject>	list = new ArrayList<AtariObject>();
+		list.addAll( Arrays.asList(floor.atari) );
+		
+		for( Block b : blockList )
+			if( b.hp > 0 )
+				list.add( b.atari );
+		
+		list.add( bar.atari );
+		list.add( ball );
+		
+		
 		//------------------------
 		// ボール進行 & 当たり判定
-		atari.forwardAndCheck( ball );
+		atari.forwardAndCheck( ball, list.iterator() );
 
 		//-------------------------------
 		// バー移動
 		bar.atari.speed.set( slide );
-		atari.forwardAndCheck( bar.atari );
-
-
+		atari.forwardAndCheck( bar.atari, list.iterator() );
+		
 		//-------------------------------
-		// レンダリングリストに登録
-		renderList.add( 10, ball );
-		renderList.add( 10, bar );
+		// レンダリングリストに自信を登録
+		renderList.add( 100, this );
 	}
 	
+	/***************************************
+	 * 
+	 * 当たった時に呼ばれる
+	 * 
+	 */
+	public void atariCallback( AtariResult result, AtariObject src ) {
+		
+		Iterator<Block>	it = blockList.iterator();
+		
+		while( it.hasNext() ) {
+			Block	block = it.next();
+			if( block.atari == result.atariobj ) {
+				
+				// ブロック消滅
+				
+				
+				block.hp -= 1;
+				
+				return;
+			}
+		}
+		
+	}
+
 	
 	/**********************************************************
 	 * 
@@ -225,10 +275,20 @@ public class BlockStage extends YNode implements YRenderer {
 		
 		
 		// モデル
-		for( Block block : blockList )
-			block.model.render(g);
+		for( Block block : blockList ) {
+			if( block.hp > 0 )
+				block.model.render(g);
+		}
 		
 		g.cullFace( false );
+		
+		//---------------------
+		// ボール
+		ball.render( g );
+		
+		//---------------------
+		// バー
+		bar.render( g );
 	}
 }
 
@@ -374,11 +434,14 @@ class Block {
 	/** モデル */
 	Model	model;
 	
+	/** 耐久度(0で消滅) */
+	int		hp = 1;
+	
 	
 	public Block( ) {
 		
 		// 幅
-		int	w = 20;	// X
+		int	w = 40;	// X
 		// 高さ(Y)
 		int	h = 30;	// Y
 		// 奥行き

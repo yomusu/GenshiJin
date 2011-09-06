@@ -1,9 +1,6 @@
 package jp.yom.yglib.vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 
 import android.util.Log;
 
@@ -22,22 +19,25 @@ import android.util.Log;
  */
 public class AtariChecker {
 	
-	ArrayList<AtariObject>	objectList = new ArrayList<AtariObject>();
+	public interface AtariCallback {
+		public void atariCallback( AtariResult result, AtariObject src );
+	}
 	
 	AtariObject	cancelModel = null;
+	
+	/** 当たった時のコールバック */
+	AtariCallback	callback = null;
 	
 	
 	/********************************************
 	 * 
-	 * チェックするサーフェースを追加する
+	 * 当たった時のコールバックをセットする
 	 * 
-	 * @param s
+	 * @param callback
 	 */
-	public void addAll( AtariObject[] atari ) {
-		objectList.addAll( Arrays.asList(atari) );
-	}
-	public void add( AtariObject atari ) {
-		objectList.add( atari );
+	public void setCallback( AtariCallback callback ) {
+		
+		this.callback = callback;
 	}
 	
 	
@@ -54,24 +54,23 @@ public class AtariChecker {
 	 * 
 	 * @param obj
 	 */
-	public void forwardAndCheck( AtariObject obj ) {
+	public void forwardAndCheck( AtariObject obj, Iterator<AtariObject> it ) {
 		
 		if( obj instanceof AtariBall ) {
-			ballForwardAndCheck( (AtariBall)obj );
+			ballForwardAndCheck( (AtariBall)obj, it );
 		}
 		
 		if( obj instanceof AtariModel ) {
-			modelForwardAndCheck( (AtariModel)obj );
+			modelForwardAndCheck( (AtariModel)obj, it );
 		}
 		
 	}
 	
-	private void modelForwardAndCheck( AtariModel obj ) {
+	private void modelForwardAndCheck( AtariModel obj, Iterator<AtariObject> it ) {
 		
 		// ボールを探す
 		AtariBall	ball = null;
 		{
-			Iterator<AtariObject>	it = objectList.iterator();
 			while( it.hasNext() ) {
 				AtariObject	o = it.next();
 				if( o instanceof AtariBall ) {
@@ -104,7 +103,7 @@ public class AtariChecker {
 		obj.forward();
 	}
 	
-	private void ballForwardAndCheck( AtariBall obj ) {
+	private void ballForwardAndCheck( AtariBall obj, Iterator<AtariObject> it ) {
 		
 		// オブジェクトを前進させる
 		obj.p0.set( obj.pos );
@@ -117,7 +116,6 @@ public class AtariChecker {
 		while( nearizer!=null ) {
 			
 			// 対象となるオブジェクトすべてと当たり判定を行う
-			Iterator<AtariObject>	it = objectList.iterator();
 			while( it.hasNext() )
 				nearizer.vite( it.next() );
 
@@ -143,7 +141,10 @@ public class AtariChecker {
 				// ログ
 				Log.v("atari", atari.toString() );
 				Log.v("atari", "after:"+obj.toString() );
-
+				
+				if( callback!=null )
+					callback.atariCallback( atari, obj );
+				
 				cancelModel = atari.atariobj;
 
 				// イテレーションしなおし

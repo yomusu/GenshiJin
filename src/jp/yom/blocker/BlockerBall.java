@@ -21,9 +21,6 @@ import jp.yom.yglib.vector.FSurface;
  */
 public class BlockerBall extends AtariBall implements YRenderer {
 
-	/** 当たり面(World座標) */
-	FSurface[]	surfaces;
-
 	/** モデル */
 	Model	model;
 	
@@ -45,7 +42,7 @@ public class BlockerBall extends AtariBall implements YRenderer {
 		};
 
 
-		surfaces = new FSurface[] {
+		FSurface[]	surfaces = new FSurface[] {
 				// 底面
 				new FSurface(ptb[1],ptb[0],ptb[3],ptb[2]),
 				// 天井
