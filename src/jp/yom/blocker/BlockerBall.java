@@ -1,13 +1,12 @@
 package jp.yom.blocker;
 
 import jp.yom.yglib.gl.Material;
-import jp.yom.yglib.gl.Model;
+import jp.yom.yglib.gl.PolyModel;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
+import jp.yom.yglib.gl.PolyModel.PolyTriangleStrip;
 import jp.yom.yglib.vector.AtariBall;
 import jp.yom.yglib.vector.FMatrix;
-import jp.yom.yglib.vector.FPoint;
-import jp.yom.yglib.vector.FSurface;
 
 
 
@@ -22,7 +21,7 @@ import jp.yom.yglib.vector.FSurface;
 public class BlockerBall extends AtariBall implements YRenderer {
 
 	/** モデル */
-	Model	model;
+	PolyModel	model;
 	
 	
 	public BlockerBall( ) {
@@ -30,37 +29,34 @@ public class BlockerBall extends AtariBall implements YRenderer {
 		// 幅
 		r = 10;
 
-		// 底面の４点
-		FPoint	ptb[] = new FPoint[] {
-				new FPoint(-r,-r,r), new FPoint(r,-r,r),
-				new FPoint(-r,-r,-r), new FPoint(r,-r,-r)
-		};
-		// 底面を壁の高さまであげた4点
-		FPoint	ptc[] = new FPoint[] {
-				new FPoint(-r,r,r), new FPoint(r,r,r),
-				new FPoint(-r,r,-r), new FPoint(r,r,-r)
-		};
-
-
-		FSurface[]	surfaces = new FSurface[] {
-				// 底面
-				new FSurface(ptb[1],ptb[0],ptb[3],ptb[2]),
-				// 天井
-				new FSurface(ptc[0],ptc[1],ptc[2],ptc[3]),
-				// 前面
-				new FSurface(ptc[2],ptc[3],ptb[2],ptb[3]),
-				// 背面
-				new FSurface(ptc[1],ptc[0],ptb[1],ptb[0]),
-				// 向かって右側面
-				new FSurface(ptc[3],ptc[1],ptb[3],ptb[1]),
-				// 向かって左側面
-				new FSurface(ptc[0],ptc[2],ptb[0],ptb[2]),
-		};
-
 		//------------------------------
 		// モデルの作成
-		model = new Model(surfaces);
-
+		model = new PolyModel();
+		
+		model.vertices = new float[][] {
+				
+				new float[]{ 0,r,0, 0,1,0 },
+				new float[]{ 0,-r,0, 0,1,0 },
+				
+				new float[]{ 0,0,r, 0,0,1 },
+				new float[]{ -r,0,0, -1,0,0 },
+				new float[]{ 0,0,-r, 0,0,-1 },
+				new float[]{ r,0,0, 1,0,0 },
+		};
+		
+		model.polys = new PolyTriangleStrip[] {
+			
+				new PolyTriangleStrip( new int[]{ 0,2,3 } ),
+				new PolyTriangleStrip( new int[]{ 0,3,4 } ),
+				new PolyTriangleStrip( new int[]{ 0,4,5 } ),
+				new PolyTriangleStrip( new int[]{ 0,4,2 } ),
+				
+				new PolyTriangleStrip( new int[]{ 1,3,2 } ),
+				new PolyTriangleStrip( new int[]{ 1,4,3 } ),
+				new PolyTriangleStrip( new int[]{ 1,5,4 } ),
+				new PolyTriangleStrip( new int[]{ 1,2,5 } ),
+		};
+		
 		// マテリアルの設定
 		Material	mate = new Material();
 		mate.setAmbientColor( 0.5f, 0.5f, 0.5f );
