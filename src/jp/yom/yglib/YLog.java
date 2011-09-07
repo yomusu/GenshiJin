@@ -1,6 +1,7 @@
 package jp.yom.yglib;
 
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 
 
@@ -28,6 +29,7 @@ public class YLog {
 		
 		if( textViewLog!=null )
 			textViewLog.info( String.format("[%s] %s\n", type, obj ) );
+		Log.i( type, (obj!=null) ? obj.toString() : "null" );
 	}
 	
 	

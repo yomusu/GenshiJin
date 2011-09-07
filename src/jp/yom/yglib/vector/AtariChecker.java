@@ -41,12 +41,6 @@ public class AtariChecker {
 	}
 	
 	
-	public void setCancelModel( AtariObject model ) {
-		cancelModel = model;
-	}
-	
-	
-	
 	/********************************************
 	 * 
 	 * 指定されたオブジェクトをセットされているスピードで
@@ -61,7 +55,8 @@ public class AtariChecker {
 		}
 		
 		if( obj instanceof AtariModel ) {
-			modelForwardAndCheck( (AtariModel)obj, it );
+			if( obj!=cancelModel )
+				modelForwardAndCheck( (AtariModel)obj, it );
 		}
 		
 	}
@@ -91,12 +86,23 @@ public class AtariChecker {
 		AtariResult	atari = nearizer.getResult();
 		if( atari!=null ) {
 
+			// ログ
+			Log.v("atari", "-- atari ----" );
+			Log.v("atari", "kiseki: "+nearizer.kiseki );
+			Log.v("atari", "before-ball: "+ball.toString() );
+
 			// ボールの速度ベクトルを反射
 			ball.speed.set( atari.calcAction( ball.speed ) );
 			
 			// ボールの位置をModelとの交点にする
 			ball.p0.set( ball.pos );
 			ball.pos.set( atari.cp ).add( obj.speed );
+			
+			// ログ
+			Log.v("atari", atari.toString() );
+			Log.v("atari", "after:"+ball.toString() );
+			
+			cancelModel = obj;
 		}
 		
 		// Modelの位置を進める
@@ -123,10 +129,6 @@ public class AtariChecker {
 			AtariResult	atari = nearizer.getResult();
 			if( atari!=null ) {
 
-				// ログ
-				Log.v("atari", "-- atari ----" );
-				Log.v("atari", "before: "+obj.toString() );
-
 				// 速度ベクトルを反射
 				obj.speed.set( atari.calcAction( obj.speed ) );
 
@@ -138,10 +140,6 @@ public class AtariChecker {
 				obj.pos.set(atari.cp).add( vnokori );
 				obj.p0.set(atari.cp);
 
-				// ログ
-				Log.v("atari", atari.toString() );
-				Log.v("atari", "after:"+obj.toString() );
-				
 				if( callback!=null )
 					callback.atariCallback( atari, obj );
 				
