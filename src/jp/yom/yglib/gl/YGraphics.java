@@ -42,10 +42,10 @@ public class YGraphics {
 	
 	public YGraphics() {
 		
-		fnbuf4 = createFloatBuffer(4*3);
-		fvbuf4 = createFloatBuffer(4*3);
-		fcbuf4 = createFloatBuffer(4*4);
-		ftbuf4 = createFloatBuffer(4*2);
+		fnbuf4 = createFloatBuffer(32*3);
+		fvbuf4 = createFloatBuffer(32*3);
+		fcbuf4 = createFloatBuffer(32*4);
+		ftbuf4 = createFloatBuffer(32*2);
 	}
 	
 	

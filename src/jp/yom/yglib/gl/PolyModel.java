@@ -1,5 +1,7 @@
 package jp.yom.yglib.gl;
 
+import javax.microedition.khronos.opengles.GL10;
+
 import jp.yom.yglib.vector.FSurface;
 
 
@@ -39,27 +41,27 @@ import jp.yom.yglib.vector.FSurface;
 public class PolyModel implements YRenderer {
 	
 	
-	public static class PolyTriangleStrip {
+	public static class Polygon {
+		
+		int		type;
 		
 		int[]	indexies;
 		
 		int		materialIndex;
 		String	textureKey;
 		
-		public PolyTriangleStrip( int[] ind ) {
+		public Polygon( int type, int[] ind ) {
 			
+			this.type = type;
 			this.indexies = ind;
 			materialIndex = 0;
 		}
 	}
 	
-	public PolyTriangleStrip[]	polys;
+	public Polygon[]	polys;
 	
 	public float[][]	vertices;
 	
-	
-	// 当たり面(World座標)
-	FSurface[]	surfaces;
 	
 	/** マテリアル */
 	public Material	material = null;
@@ -86,25 +88,42 @@ public class PolyModel implements YRenderer {
 		}
 		
 		// サーフェスから
-		for( PolyTriangleStrip s : polys ) {
+		for( Polygon poly : polys ) {
 			
 			int	cnt = 0;
-			for( int i : s.indexies ) {
+			for( int i : poly.indexies ) {
 				
 				float[]	data = vertices[i];
 				
-				bufVertices[cnt] = data[0];
-				bufVertices[cnt+1] = data[1];
-				bufVertices[cnt+2] = data[2];
-				
-				bufNormals[cnt] = data[3];
-				bufNormals[cnt+1] = data[4];
-				bufNormals[cnt+2] = data[5];
+				// 頂点
+				g.fvbuf4.put( data, 0, 3 );
+				// 法線
+				g.fnbuf4.put( data, 3, 3 );
 				
 				cnt += 3;
 			}
 			
-			g.drawPoly4( bufVertices, bufNormals, null );
+			// バッファの位置リセット
+			g.fnbuf4.position(0);
+			g.fvbuf4.position(0);
+			
+			
+			g.gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
+			g.gl.glNormalPointer( GL10.GL_FLOAT, 0, g.fnbuf4 );
+			
+			g.gl.glEnableClientState( GL10.GL_VERTEX_ARRAY );
+			g.gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, g.fvbuf4 );
+			
+			
+			if( poly.type==0 )
+				g.gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, poly.indexies.length );
+			else
+				g.gl.glDrawArrays( GL10.GL_TRIANGLE_FAN, 0, poly.indexies.length );
+			
+			g.gl.glDisableClientState( GL10.GL_COLOR_ARRAY );
+			g.gl.glDisableClientState( GL10.GL_NORMAL_ARRAY );
+			g.gl.glDisableClientState( GL10.GL_VERTEX_ARRAY );
+			
 		}
 	}
 }

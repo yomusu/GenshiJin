@@ -4,7 +4,7 @@ import jp.yom.yglib.gl.Material;
 import jp.yom.yglib.gl.PolyModel;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
-import jp.yom.yglib.gl.PolyModel.PolyTriangleStrip;
+import jp.yom.yglib.gl.PolyModel.Polygon;
 import jp.yom.yglib.vector.AtariBall;
 import jp.yom.yglib.vector.FMatrix;
 
@@ -33,28 +33,29 @@ public class BlockerBall extends AtariBall implements YRenderer {
 		// モデルの作成
 		model = new PolyModel();
 		
+		float	H = 0.7071f;
+		float	h = H * r;
+		
 		model.vertices = new float[][] {
 				
 				new float[]{ 0,r,0, 0,1,0 },
-				new float[]{ 0,-r,0, 0,1,0 },
 				
-				new float[]{ 0,0,r, 0,0,1 },
-				new float[]{ -r,0,0, -1,0,0 },
-				new float[]{ 0,0,-r, 0,0,-1 },
-				new float[]{ r,0,0, 1,0,0 },
+				new float[]{ 0,0,r,    0,0,1 },
+				new float[]{ -h,0,h,  -H,0,H },
+				new float[]{ -r,0,0,  -1,0,0 },
+				new float[]{ -h,0,-h, -H,0,-H },
+				new float[]{ 0,0,-r,   0,0,-1 },
+				new float[]{ h,0,-h,   H,0,-H },
+				new float[]{ r,0,0,    1,0,0 },
+				new float[]{ h,0,h,    H,0,H },
+				
+				new float[]{ 0,-r,0, 0,1,0 },
 		};
 		
-		model.polys = new PolyTriangleStrip[] {
+		model.polys = new Polygon[] {
 			
-				new PolyTriangleStrip( new int[]{ 0,2,3 } ),
-				new PolyTriangleStrip( new int[]{ 0,3,4 } ),
-				new PolyTriangleStrip( new int[]{ 0,4,5 } ),
-				new PolyTriangleStrip( new int[]{ 0,4,2 } ),
-				
-				new PolyTriangleStrip( new int[]{ 1,3,2 } ),
-				new PolyTriangleStrip( new int[]{ 1,4,3 } ),
-				new PolyTriangleStrip( new int[]{ 1,5,4 } ),
-				new PolyTriangleStrip( new int[]{ 1,2,5 } ),
+				new Polygon( 1, new int[]{ 0, 1,2,3,4,5,6,7,8,1 } ),
+				new Polygon( 1, new int[]{ 9, 8,7,6,5,4,3,2,1,8 } ),
 		};
 		
 		// マテリアルの設定
