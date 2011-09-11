@@ -11,12 +11,15 @@ import jp.yom.yglib.SlideWatcher;
 import jp.yom.yglib.gl.Camera;
 import jp.yom.yglib.gl.Light;
 import jp.yom.yglib.gl.Material;
-import jp.yom.yglib.gl.Model;
+import jp.yom.yglib.gl.PolyModel;
+import jp.yom.yglib.gl.PolyModel.Polygon;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.AtariChecker;
+import jp.yom.yglib.vector.AtariChecker.AtariCallback;
+import jp.yom.yglib.vector.AtariChecker.AtariResult;
 import jp.yom.yglib.vector.AtariModel;
 import jp.yom.yglib.vector.AtariObject;
 import jp.yom.yglib.vector.FLine;
@@ -24,8 +27,6 @@ import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
 import jp.yom.yglib.vector.FVector;
-import jp.yom.yglib.vector.AtariChecker.AtariCallback;
-import jp.yom.yglib.vector.AtariChecker.AtariResult;
 
 
 /******************************************************
@@ -355,7 +356,7 @@ class Floor {
 	};
 	
 	/** モデル */
-	Model	model;
+	PolyModel	model;
 	
 	
 	public Floor( ) {
@@ -406,7 +407,29 @@ class Floor {
 		
 		//------------------------------
 		// モデルの作成
-		model = new Model(surfaces);
+		model = new PolyModel();
+		
+		model.positions = new float[] {
+				
+				-hw,h,hd,	hw,h,hd,
+				-hw,h,-hd,	hw,h,-hd,
+				
+				-hw,0,hd,	hw,0,hd,
+				-hw,0,-hd,	hw,0,-hd,
+		};
+		
+		model.normals = new float[] {
+				// 奥>右>手前>左
+				0,0,-1,	1,0,0,	0,0,1,	-1,0,0
+		};
+		
+		model.polys = new Polygon[] {
+				// 奥>右>手前>左
+				PolyModel.createTriStrip( new int[]{ 4,0,5,1, 7,3, 6,2, 4,0 }, new int[]{0,0,0,0, 1,1, 2,2, 3,3 }, 0 ),
+		};
+		
+		
+		
 		
 		// マテリアルの設定
 		Material	mate = new Material();
@@ -416,7 +439,7 @@ class Floor {
 		mate.setEmissionColor( 0f, 0f, 0f );
 		mate.setShinness( 0f );
 		
-		model.material = mate;
+		model.materials = new Material[]{ mate };
 	}
 }
 
@@ -432,7 +455,7 @@ class Block {
 	AtariModel	atari = new AtariModel();
 	
 	/** モデル */
-	Model	model;
+	PolyModel	model;
 	
 	/** 耐久度(0で消滅) */
 	int		hp = 1;
@@ -449,6 +472,9 @@ class Block {
 		
 		int	hw = w / 2;	// X
 		int	hd = d / 2;	// Y
+		
+		//-----------------------------------
+		// あたり用モデルの作成
 		
 		// 底面の４点
 		FPoint	ptb[] = new FPoint[] {
@@ -485,9 +511,34 @@ class Block {
 		};
 		
 		//------------------------------
-		// モデルの作成
-		model = new Model(atari.surfaces);
+		// 描画用モデルの作成
+		model = new PolyModel();
 		
+		model.positions = new float[] {
+				
+				-hw,h,hd,	hw,h,hd,
+				-hw,h,-hd,	hw,h,-hd,
+				
+				-hw,0,hd,	hw,0,hd,
+				-hw,0,-hd,	hw,0,-hd,
+				
+		};
+		
+		model.normals = new float[] {
+				// 天井
+				0,1,0,
+				// 前>右>後>左
+				0,0,-1,	-1,0,0,	0,0,1,	1,0,0
+		};
+		
+		model.polys = new Polygon[] {
+				// 蓋
+				PolyModel.createTriStrip( new int[]{ 0,1,2,3 }, new int[]{ 0,0,0,0 }, 0 ),
+				// 前>右>後>左
+				PolyModel.createTriStrip( new int[]{ 6,2,7,3, 5,1, 4,0, 6,2 }, new int[]{1,1,1,1, 2,2, 3,3, 4,4 }, 0 ),
+		};
+		
+		//------------------------------
 		// マテリアルの設定
 		Material	mate = new Material();
 		
@@ -497,7 +548,7 @@ class Block {
 		mate.setEmissionColor( 0f, 0f, 0f );
 		mate.setShinness( 0.1f );
 		
-		model.material = mate;
+		model.materials = new Material[]{ mate };
 	}
 	
 }

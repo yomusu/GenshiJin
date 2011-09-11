@@ -2,8 +2,6 @@ package jp.yom.yglib.gl;
 
 import javax.microedition.khronos.opengles.GL10;
 
-import jp.yom.yglib.vector.FSurface;
-
 
 
 
@@ -15,25 +13,19 @@ import jp.yom.yglib.vector.FSurface;
  * モデルひとつとは、
  * 
  * ・同じアフィン変換を使用する
- * ・同じ頂点リストを共有する
+ * ・同じ頂点座標リストを共有する
+ * ・同じ法線リストを共有する
+ * ・同じUVリストを共有する
  * 
- * ・複数の面を使用する
- * ・複数のマテリアルを使用する
- * ・複数のテクスチャを使用する
+ * ・複数のポリゴンを使用できる
  * 
  * 
- * 頂点リスト
- * マテリアルリスト
+ * ポリゴンひとつは、
+ * ・TriangleFanかTriangleStripを指定できる
+ * ・頂点座標、法線、UVをインデックスで指定する
+ * ・マテリアルをひとつ使用できる
+ * ・テクスチャをひとつ指定できる
  * 
- * 【面の構成】
- * ・複数の頂点（3点もしくは4点をインデックスで）
- * ・マテリアル（インデックス）
- * ・テクスチャ（キー）
- * 
- * 【頂点の構成】
- * ・座標
- * ・法線
- * ・UV
  * 
  * @author Yomusu
  *
@@ -41,38 +33,84 @@ import jp.yom.yglib.vector.FSurface;
 public class PolyModel implements YRenderer {
 	
 	
+	//=======================================================
+	// ポリゴンクラスの宣言
+	//=======================================================
+	
 	public static class Polygon {
 		
 		int		type;
 		
-		int[]	indexies;
+		int[]	posIndexies;
+		int[]	normIndexies;
 		
 		int		materialIndex;
 		String	textureKey;
 		
-		public Polygon( int type, int[] ind ) {
-			
-			this.type = type;
-			this.indexies = ind;
-			materialIndex = 0;
-		}
+		protected Polygon() {}
 	}
 	
+	//=======================================================
+	// スタティックメソッドの宣言
+	//=======================================================
+	
+	/******************
+	 * 
+	 * create a triangle fan
+	 * without texture
+	 * 
+	 */
+	public static Polygon createTriFan( int[] pos, int[] norm, int material ) {
+		
+		Polygon	p = new Polygon();
+		
+		p.type = GL10.GL_TRIANGLE_FAN;
+		p.posIndexies = pos;
+		p.normIndexies = norm;
+		p.materialIndex = material;
+		
+		return p;
+	}
+	
+	/******************
+	 * 
+	 * create a triangle strip
+	 * without texture
+	 * 
+	 */
+	public static Polygon createTriStrip( int[] pos, int[] norm, int material ) {
+		
+		Polygon	p = new Polygon();
+		
+		p.type = GL10.GL_TRIANGLE_STRIP;
+		p.posIndexies = pos;
+		p.normIndexies = norm;
+		p.materialIndex = material;
+		
+		return p;
+	}
+	
+	//=======================================================
+	// メンバ変数の宣言
+	//=======================================================
+	
+	/** ポリゴン配列 */
 	public Polygon[]	polys;
 	
-	public float[][]	vertices;
+	/** 頂点座標配列 */
+	public float[]	positions;
+	/** 法線配列 */
+	public float[]	normals;
 	
 	
-	/** マテリアル */
-	public Material	material = null;
-	
-	
-	/** レンダリング用頂点座標バッファ */
-	float[]	bufVertices = new float[4*3];
-	float[]	bufNormals  = new float[4*3];
+	/** マテリアル配列 */
+	public Material[]	materials = null;
 	
 	
 	
+	//=======================================================
+	// メソッドの宣言
+	//=======================================================
 	
 	/**************************************************
 	 * 
@@ -82,31 +120,23 @@ public class PolyModel implements YRenderer {
 	@Override
 	public void render(YGraphics g) {
 		
-		// マテリアル
-		if( material!=null ) {
-			material.render( g );
-		}
-		
 		// サーフェスから
 		for( Polygon poly : polys ) {
 			
-			int	cnt = 0;
-			for( int i : poly.indexies ) {
-				
-				float[]	data = vertices[i];
-				
-				// 頂点
-				g.fvbuf4.put( data, 0, 3 );
-				// 法線
-				g.fnbuf4.put( data, 3, 3 );
-				
-				cnt += 3;
-			}
+			// マテリアル
+			materials[poly.materialIndex].render( g );
+			
+			// 頂点
+			for( int n : poly.posIndexies )
+				g.fvbuf4.put( positions, n*3, 3 );
+			
+			// 法線
+			for( int n : poly.normIndexies )
+				g.fnbuf4.put( normals, n*3, 3 );
 			
 			// バッファの位置リセット
 			g.fnbuf4.position(0);
 			g.fvbuf4.position(0);
-			
 			
 			g.gl.glEnableClientState( GL10.GL_NORMAL_ARRAY );
 			g.gl.glNormalPointer( GL10.GL_FLOAT, 0, g.fnbuf4 );
@@ -115,10 +145,7 @@ public class PolyModel implements YRenderer {
 			g.gl.glVertexPointer( 3, GL10.GL_FLOAT, 0, g.fvbuf4 );
 			
 			
-			if( poly.type==0 )
-				g.gl.glDrawArrays( GL10.GL_TRIANGLE_STRIP, 0, poly.indexies.length );
-			else
-				g.gl.glDrawArrays( GL10.GL_TRIANGLE_FAN, 0, poly.indexies.length );
+			g.gl.glDrawArrays( poly.type, 0, poly.posIndexies.length );
 			
 			g.gl.glDisableClientState( GL10.GL_COLOR_ARRAY );
 			g.gl.glDisableClientState( GL10.GL_NORMAL_ARRAY );

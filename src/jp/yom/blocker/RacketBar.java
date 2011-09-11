@@ -2,18 +2,17 @@ package jp.yom.blocker;
 
 import jp.yom.yglib.GameActivity;
 import jp.yom.yglib.gl.Material;
-import jp.yom.yglib.gl.Model;
+import jp.yom.yglib.gl.PolyModel;
+import jp.yom.yglib.gl.PolyModel.Polygon;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
 import jp.yom.yglib.gl.YRendererList;
 import jp.yom.yglib.node.YNode;
 import jp.yom.yglib.vector.AtariModel;
-import jp.yom.yglib.vector.AtariObject;
 import jp.yom.yglib.vector.FLine;
 import jp.yom.yglib.vector.FMatrix;
 import jp.yom.yglib.vector.FPoint;
 import jp.yom.yglib.vector.FSurface;
-import jp.yom.yglib.vector.FVector;
 
 
 /**************************************************************
@@ -31,7 +30,7 @@ public class RacketBar  extends YNode implements YRenderer {
 	AtariModel	atari = new AtariModel();
 	
 	/** モデル */
-	Model	model;
+	PolyModel	model;
 	
 	
 	public RacketBar( ) {
@@ -75,17 +74,41 @@ public class RacketBar  extends YNode implements YRenderer {
 
 		//------------------------------
 		// モデルの作成
-		model = new Model(atari.surfaces);
-
+		model = new PolyModel();
+		
+		model.positions = new float[] {
+				
+				-hw,h,hd,	hw,h,hd,
+				-hw,h,-hd,	hw,h,-hd,
+				
+				-hw,0,hd,	hw,0,hd,
+				-hw,0,-hd,	hw,0,-hd,
+		};
+		
+		model.normals = new float[] {
+				// 天井
+				0,1,0,
+				// 前>右>後>左
+				0,0,-1,	-1,0,0,	0,0,1,	1,0,0
+		};
+		
+		model.polys = new Polygon[] {
+				// 蓋
+				PolyModel.createTriStrip( new int[]{ 0,1,2,3 }, new int[]{ 0,0,0,0 }, 0 ),
+				// 前>右>後>左
+				PolyModel.createTriStrip( new int[]{ 6,2,7,3, 5,1, 4,0, 6,2 }, new int[]{1,1,1,1, 2,2, 3,3, 4,4 }, 0 ),
+		};
+		
+		
 		// マテリアルの設定
 		Material	mate = new Material();
-		mate.setAmbientColor( 0.5f, 0.5f, 0.5f );
+		mate.setAmbientColor( 0.2f, 0.2f, 0.2f );
 		mate.setDiffuseColor( 0.6f, 0.7f, 0.8f );
 		mate.setSpecularColor( 0.9f, 0.9f, 0.9f );
 		mate.setEmissionColor( 0.2f, 0.2f, 0.2f );
 		mate.setShinness( 10f );
 
-		model.material = mate;
+		model.materials = new Material[]{ mate };
 		
 		
 		

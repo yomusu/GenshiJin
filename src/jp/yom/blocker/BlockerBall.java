@@ -1,10 +1,12 @@
 package jp.yom.blocker;
 
+import java.util.Arrays;
+
 import jp.yom.yglib.gl.Material;
 import jp.yom.yglib.gl.PolyModel;
+import jp.yom.yglib.gl.PolyModel.Polygon;
 import jp.yom.yglib.gl.YGraphics;
 import jp.yom.yglib.gl.YRenderer;
-import jp.yom.yglib.gl.PolyModel.Polygon;
 import jp.yom.yglib.vector.AtariBall;
 import jp.yom.yglib.vector.FMatrix;
 
@@ -33,40 +35,46 @@ public class BlockerBall extends AtariBall implements YRenderer {
 		// モデルの作成
 		model = new PolyModel();
 		
+		// 半径1の円に（法線）
 		float	H = 0.7071f;
-		float	h = H * r;
-		
-		model.vertices = new float[][] {
+		model.normals = new float[] {
 				
-				new float[]{ 0,r,0, 0,1,0 },
+				0,1,0,
 				
-				new float[]{ 0,0,r,    0,0,1 },
-				new float[]{ -h,0,h,  -H,0,H },
-				new float[]{ -r,0,0,  -1,0,0 },
-				new float[]{ -h,0,-h, -H,0,-H },
-				new float[]{ 0,0,-r,   0,0,-1 },
-				new float[]{ h,0,-h,   H,0,-H },
-				new float[]{ r,0,0,    1,0,0 },
-				new float[]{ h,0,h,    H,0,H },
+				0,0,1,
+				-H,0,H,
+				-1,0,0,
+				-H,0,-H,
+				 0,0,-1,
+				 H,0,-H,
+				 1,0,0,
+				 H,0,H,
 				
-				new float[]{ 0,-r,0, 0,1,0 },
+				 0,-1,0,
 		};
 		
+		// 直径rをかけて円を作成
+		model.positions = Arrays.copyOf( model.normals, model.normals.length );
+		for( int i=0; i<model.positions.length; i++ )
+			model.positions[i] *= r;
+		
+		int[]	upper = new int[]{ 0, 1,2,3,4,5,6,7,8,1 };
+		int[]	bottom= new int[]{ 9, 8,7,6,5,4,3,2,1,8 };
+		
 		model.polys = new Polygon[] {
-			
-				new Polygon( 1, new int[]{ 0, 1,2,3,4,5,6,7,8,1 } ),
-				new Polygon( 1, new int[]{ 9, 8,7,6,5,4,3,2,1,8 } ),
+				PolyModel.createTriFan( upper, upper, 0 ),
+				PolyModel.createTriFan( bottom, bottom, 0 ),
 		};
 		
 		// マテリアルの設定
 		Material	mate = new Material();
-		mate.setAmbientColor( 0.5f, 0.5f, 0.5f );
+		mate.setAmbientColor( 0.2f, 0.2f, 0.2f );
 		mate.setDiffuseColor( 0.6f, 0.7f, 0.8f );
 		mate.setSpecularColor( 0.9f, 0.9f, 0.9f );
 		mate.setEmissionColor( 0.2f, 0.2f, 0.2f );
 		mate.setShinness( 10f );
 
-		model.material = mate;
+		model.materials = new Material[]{ mate };
 		
 		
 		
